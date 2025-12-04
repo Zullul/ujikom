@@ -4,21 +4,37 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Scopes\TahunAjaranScope;
+use Spatie\Activitylog\Traits\LogsActivity; // <-- Tambahkan
+use Spatie\Activitylog\LogOptions;          // <-- Tambahkan
 
 class Dudi extends Model
 {
-    use HasFactory;
+    use HasFactory , LogsActivity ;
 
     protected $table = 'dudis';
 
-    protected $fillable = [
-        'sekolah_id',
-        'nama_dudi',
-        'bidang_usaha',
-        'alamat',
-        'pimpinan',
-        'instruktur'
-    ];
+    protected $guarded = [];
+    // --- Tambahkan method getActivitylogOptions ---
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['nama_dudi', 'alamat', 'nama_pimpinan', 'no_telp']) // Log atribut ini
+            ->logOnlyDirty()
+            ->useLogName('Data Dudi')
+            ->setDescriptionForEvent(fn(string $eventName) => $this->generateLogDescription($eventName))
+            ->dontSubmitEmptyLogs();
+    }
+    public function generateLogDescription(string $eventName): string
+    {
+        $action = match($eventName) { 'created' => 'membuat', 'updated' => 'memperbarui', 'deleted' => 'menghapus', default => 'melakukan aksi pada' };
+        return "{$action} data dudi: {$this->nama_dudi} (Pimpinan: {$this->nama_pimpinan})";
+    }
+
+    public function tahunAjaran()
+    {
+        return $this->belongsTo(tahun_ajaran::class);
+    }
 
     public function sekolah()
     {
@@ -27,15 +43,21 @@ class Dudi extends Model
 
     // Relasi ke User
     // Tambahkan method ini ke model Dudi yang sudah ada
-    public function user()
-    {
-        return $this->hasOne(User::class, 'ref_id')->where('role_id', 3);
-    }
+    // public function users()
+    // {
+    //     return $this->hasMany(User::class);
+    // }
 
     // Relasi ke dudi pembimbing
     public function pembimbings()
     {
-        return $this->hasMany(dudi_pembimbing::class, 'dudi_id');
+        return $this->hasMany(DudiPembimbing::class, 'dudi_id');
+    }
+
+    // Alias untuk compatibility dengan view
+    public function dudiPembimbings()
+    {
+        return $this->pembimbings();
     }
 
     // Relasi ke prakerin siswa
@@ -63,15 +85,26 @@ class Dudi extends Model
         return $query->whereDoesntHave('user');
     }
 
-    // Helper method untuk membuat username otomatis
-    public function generateUsername()
+    protected static function booted(): void
     {
-        return strtolower(str_replace([' ', '.', ',', '-'], '_', $this->nama_dudi));
+        static::addGlobalScope(new TahunAjaranScope);
     }
 
-    // Helper method untuk membuat email otomatis
-    public function generateEmail()
+    public function user()
     {
-        return $this->generateUsername() . '@dudi.com';
+        // Ganti 'sekolah_id' menjadi 'ref_id'
+        return $this->hasOne(User::class, 'ref_id')->where('role_type', 'dudi');
     }
+
+    // // Helper method untuk membuat username otomatis
+    // public function generateUsername()
+    // {
+    //     return strtolower(str_replace([' ', '.', ',', '-'], '_', $this->nama_dudi));
+    // }
+
+    // // Helper method untuk membuat email otomatis
+    // public function generateEmail()
+    // {
+    //     return $this->generateUsername() . '@dudi.com';
+    // }
 }

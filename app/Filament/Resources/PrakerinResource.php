@@ -9,186 +9,77 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
 
 class PrakerinResource extends Resource
 {
     protected static ?string $model = Prakerin::class;
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
     protected static ?string $navigationLabel = 'Data Prakerin';
     protected static ?string $pluralModelLabel = 'Data Prakerin';
-    protected static ?string $modelLabel = 'Prakerin';
     protected static ?string $navigationGroup = 'Manajemen Prakerin';
+    protected static ?int $navigationSort = 1;
 
     public static function shouldRegisterNavigation(): bool
     {
-        $user = Auth::user();
-        // Semua role bisa melihat prakerin, tapi dengan batasan berbeda
-        return $user && ($user->isAdmin() || $user->isGuru() || $user->isDudi() || $user->isSiswa());
+        return Auth::user()->isAdminSekolah();
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('ketua')
-                    ->label('Ketua')
+                Forms\Components\TextInput::make('ketua')
                     ->required()
                     ->maxLength(255),
-
-                TextInput::make('sekretaris')
-                    ->label('Sekretaris')
+                Forms\Components\TextInput::make('sekretaris')
                     ->required()
                     ->maxLength(255),
-
-                DateTimePicker::make('tanggal_mulai')
-                    ->label('Tanggal Mulai')
+                Forms\Components\DatePicker::make('tanggal_mulai')
                     ->required()
                     ->native(false),
-
-                DateTimePicker::make('tanggal_selesai')
-                    ->label('Tanggal Selesai')
+                Forms\Components\DatePicker::make('tanggal_selesai')
                     ->required()
                     ->native(false)
                     ->after('tanggal_mulai'),
-
-                Textarea::make('keterangan')
-                    ->label('Keterangan')
+                Forms\Components\TextInput::make('no_sk')
+                    ->label('Nomor SK')
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+                Forms\Components\Textarea::make('keterangan')
                     ->required()
-                    ->rows(3),
-
-                Select::make('sekolah_id')
-                    ->label('Sekolah')
-                    ->relationship('sekolah', 'nama_sekolah')
-                    ->required()
-                    ->default(function () {
-                        $user = Auth::user();
-                        return $user->sekolah_id ?? null;
-                    })
-                    ->disabled(function () {
-                        $user = Auth::user();
-                        return !$user->isAdmin(); // Non-admin tidak bisa ubah sekolah
-                    }),
-
-                Select::make('tahun_ajaran_id')
-                    ->label('Tahun Ajaran')
-                    ->relationship('tahunAjaran', 'tahun_ajaran')
-                    ->required(),
-
-                TextInput::make('tahun_ajaran')
-                    ->label('Tahun Ajaran (Text)')
-                    ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->columnSpanFull(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                $user = Auth::user();
-
-                if ($user->isAdmin()) {
-                    // Admin bisa lihat semua prakerin
-                    return $query;
-                }
-
-                if ($user->isGuru() || $user->isSiswa() || $user->isDudi()) {
-                    // Filter berdasarkan sekolah user
-                    if ($user->sekolah_id) {
-                        $query->where('sekolah_id', $user->sekolah_id);
-                    }
-
-                    if ($user->isDudi()) {
-                        // Dudi hanya bisa lihat prakerin yang ada siswa di tempat mereka
-                        return $query->whereHas('prakerinSiswa', function ($q) use ($user) {
-                            $q->where('dudi_id', $user->ref_id);
-                        });
-                    }
-
-                    if ($user->isSiswa()) {
-                        // Siswa hanya bisa lihat prakerin yang mereka ikuti
-                        return $query->whereHas('prakerinSiswa', function ($q) use ($user) {
-                            $q->where('siswa_id', $user->ref_id);
-                        });
-                    }
-
-                    return $query;
-                }
-
-                return $query->whereRaw('1 = 0');
+            ->modifyQueryUsing(function ($query) {
+                $query->where('sekolah_id', Auth::user()->sekolah_id)
+                      ->where('tahun_ajaran_id', session('selected_tahun_ajaran_id'));
             })
             ->columns([
-                TextColumn::make('ketua')
-                    ->label('Ketua')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('sekretaris')
-                    ->label('Sekretaris')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('tanggal_mulai')
-                    ->label('Tanggal Mulai')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable(),
-
-                TextColumn::make('tanggal_selesai')
-                    ->label('Tanggal Selesai')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable(),
-
-                TextColumn::make('durasi')
-                    ->label('Durasi')
-                    ->getStateUsing(function (Prakerin $record) {
-                        if ($record->tanggal_mulai && $record->tanggal_selesai) {
-                            return $record->tanggal_mulai->diffInDays($record->tanggal_selesai) . ' hari';
-                        }
-                        return '-';
-                    }),
-
-                TextColumn::make('sekolah.nama_sekolah')
-                    ->label('Sekolah')
-                    ->searchable()
-                    ->visible(fn() => Auth::user()->isAdmin()),
-
-                TextColumn::make('tahun_ajaran')
-                    ->label('Tahun Ajaran')
-                    ->searchable(),
-
-                TextColumn::make('prakerinSiswa_count')
-                    ->label('Jumlah Siswa')
-                    ->counts('prakerinSiswa')
-                    ->badge()
-                    ->color('info'),
+                Tables\Columns\TextColumn::make('ketua')->searchable(),
+                // Tables\Columns\TextColumn::make('tahunAjaran.tahun_ajaran')->label('Tahun Ajaran')->sortable(),
+                Tables\Columns\TextColumn::make('tanggal_mulai')->dateTime('d M Y'),
+                Tables\Columns\TextColumn::make('tanggal_selesai')->dateTime('d M Y'),
+                Tables\Columns\TextColumn::make('no_sk')->label('No. SK'),
+                Tables\Columns\TextColumn::make('keterangan')->limit(50),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('sekolah_id')
-                    ->relationship('sekolah', 'nama_sekolah')
-                    ->label('Sekolah')
-                    ->visible(fn() => Auth::user()->isAdmin()),
+                //
             ])
             ->actions([
+                Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make()
-                    ->visible(fn() => Auth::user()->isAdmin() || Auth::user()->isGuru()),
-                Tables\Actions\DeleteAction::make()
-                    ->visible(fn() => Auth::user()->isAdmin()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn() => Auth::user()->isAdmin()),
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ])
-            ->defaultSort('created_at', 'desc');
+            ]);
     }
 
     public static function getPages(): array
@@ -199,11 +90,5 @@ class PrakerinResource extends Resource
             'view' => Pages\ViewPrakerin::route('/{record}'),
             'edit' => Pages\EditPrakerin::route('/{record}/edit'),
         ];
-    }
-
-    public static function canCreate(): bool
-    {
-        $user = Auth::user();
-        return $user && ($user->isAdmin() || $user->isGuru());
     }
 }

@@ -12,6 +12,7 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
-        return $request->expectsJson() ? null : route('login');
+        // Ganti route('login') dengan route('filament.admin.auth.login')
+        return $request->expectsJson() ? null : route('filament.admin.auth.login');
     }
 }

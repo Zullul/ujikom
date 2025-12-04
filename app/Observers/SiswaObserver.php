@@ -14,7 +14,7 @@ class SiswaObserver
         User::create([
             'name' => $siswa->nama_siswa,
             'username' => $siswa->nis, // Menggunakan NIS sebagai username
-            'email' => $this->generateEmail($siswa->nama_siswa, $siswa->nis),
+            'email' => $this->generateEmail($siswa->nis),
             'password' => bcrypt($siswa->nis), // Password default = NIS
             'role_id' => 1, // Siswa
             'role_type' => 'siswa',
@@ -23,9 +23,8 @@ class SiswaObserver
         ]);
     }
 
-    private function generateEmail($nama, $nis)
+    private function generateEmail( $nis)
     {
-        $namaSlug = Str::slug(strtolower($nama));
-        return $namaSlug . '.' . $nis . '@siswa.com';
+        return $nis . '@siswa.com';
     }
 }

@@ -14,6 +14,8 @@ class ListTahunAjarans extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            // Logika kenaikan kelas yang lama bisa dikembalikan jika diperlukan,
+            // atau hapus aksi ini jika Anda ingin melakukannya secara manual.
         ];
     }
 }

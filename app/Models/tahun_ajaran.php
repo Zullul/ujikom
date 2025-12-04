@@ -9,30 +9,38 @@ class tahun_ajaran extends Model
 {
     use HasFactory;
 
-    protected $table = 'tahun_ajaran';
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    // --- TAMBAHKAN BARIS INI UNTUK MEMPERBAIKI ERROR ---
+    protected $table = 'tahun_ajarans';
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'tahun_ajaran',
-        'sekolah_id',
-        'is_active'
+        'sekolah_id'
     ];
 
-    protected $casts = [
-        'is_active' => 'boolean'
-    ];
-
+    /**
+     * Get the sekolah that owns the tahun_ajaran.
+     */
     public function sekolah()
     {
         return $this->belongsTo(Sekolah::class);
     }
 
-    public function prakerin()
+    /**
+     * Get the prakerins for the tahun_ajaran.
+     */
+    public function prakerins()
     {
         return $this->hasMany(Prakerin::class);
     }
-
-    public function kelasSiswa()
-    {
-        return $this->hasMany(KelasSiswa::class);
-    }
+    
 }

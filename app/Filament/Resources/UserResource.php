@@ -6,13 +6,14 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use App\Models\Siswa;
 use App\Models\Guru;
-use App\Models\Dudi;
+use App\Models\Sekolah;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Filament\Notifications\Notification;
@@ -21,164 +22,183 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationLabel = 'Data User';
-    protected static ?string $pluralModelLabel = 'Data User';
-    protected static ?string $modelLabel = 'Data User';
-    protected static ?string $navigationGroup = 'Pengaturan';
 
-    public static function shouldRegisterNavigation(): bool
+    // Method untuk menentukan Grup Navigasi secara dinamis
+    public static function getNavigationGroup(): string
     {
         $user = Auth::user();
-        return $user && $user->isAdmin();
+        if ($user->isSuperAdmin()) {
+            return "Manajemen Data";
+        }
+        return "Pengaturan";
     }
 
+    public static function getNavigationSort(): int
+    {
+        $user = Auth::user();
+        if ($user->isSuperAdmin()) {
+            return 3;
+        }
+        return 1;
+    }
+
+    // Method untuk menentukan Ikon Navigasi secara dinamis
+    public static function getNavigationIcon(): string
+    {
+        $user = Auth::user();
+        if ($user && $user->isAdminSekolah()) {
+            return 'heroicon-o-cog';
+        }
+        if ($user && $user->isSuperAdmin()) {
+            return 'heroicon-o-users';
+        }
+        return 'heroicon-o-users';
+    }
+
+    // Method untuk menentukan Label Navigasi secara dinamis
+    public static function getNavigationLabel(): string
+    {
+        $user = Auth::user();
+        if ($user && $user->isSuperAdmin()) {
+            return 'Data Akun Sekolah';
+        }
+        if ($user && $user->isAdminSekolah()) {
+            return 'Data Akun Pengguna';
+        }
+        return 'Data User';
+    }
+
+    // Method untuk menampilkan menu ini hanya untuk role tertentu
+    public static function canViewAny(): bool
+{
+    $user = Auth::user();
+    return $user->isSuperAdmin() || $user->isAdminSekolah();
+}
+
+// Method untuk membatasi create hanya untuk admin sekolah dengan ref_id
+    public static function canCreate(): bool
+    {
+        $user = Auth::user();
+        
+        // Hanya admin sekolah dengan ref_id (admin utama) yang bisa create
+        if ($user->isAdminSekolah() && !is_null($user->ref_id)) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    // Method untuk memfilter data yang ditampilkan di tabel
+    public static function getEloquentQuery(): Builder
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $query = parent::getEloquentQuery();
+
+        if ($user->isSuperAdmin()) {
+            return $query->where('role_type', 'admin_sekolah')->whereNotNull('ref_id');
+        }
+
+        if ($user->isAdminSekolah()) {
+            $query->where('sekolah_id', $user->sekolah_id);
+
+            if (is_null($user->ref_id)) { // Jika dia Humas Biasa
+                $query->where(function (Builder $subQuery) use ($user) {
+                    $subQuery->where('role_type', '!=', 'admin_sekolah')
+                        ->orWhere('id', $user->id);
+                });
+            }
+        }
+
+        return $query;
+    }
+
+    // Mendefinisikan form untuk Create dan Edit
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+        $record = $form->getRecord();
 
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(User::class, 'email', ignoreRecord: true),
-
-                Forms\Components\TextInput::make('username')
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(User::class, 'username', ignoreRecord: true),
-
-                Forms\Components\Select::make('role_type')
-                    ->label('Role Type')
-                    ->options([
-                        'admin_pusat' => 'Admin Pusat',
-                        'admin_sekolah' => 'Admin Sekolah',
-                        'siswa' => 'Siswa',
-                        'guru' => 'Guru',
-                        'dudi' => 'Dudi Pembimbing',
+        // Form untuk halaman CREATE (membuat humas baru)
+        if (!$record) {
+            return $form->schema([
+                Forms\Components\Repeater::make('users')
+                    ->label('Admin Sekolah (Humas)')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')->required()->label('Nama'),
+                        Forms\Components\TextInput::make('username')->required()->label('Username')->unique(ignoreRecord: true),
+                        Forms\Components\TextInput::make('email')->required()->email()->label('Email')->unique(ignoreRecord: true),
+                        Forms\Components\Hidden::make('sekolah_id')->default(fn() => Auth::user()->sekolah_id),
+                        Forms\Components\TextInput::make('password')->required()->minLength(8)->label('Password'),
                     ])
-                    ->required()
-                    ->reactive()
-                    ->afterStateUpdated(function (callable $set, $state) {
-                        $set('ref_id', null);
-                        $roleMapping = [
-                            'admin_pusat' => 0,
-                            'admin_sekolah' => 0,
-                            'siswa' => 1,
-                            'guru' => 2,
-                            'dudi' => 3,
-                        ];
-                        $set('role_id', $roleMapping[$state] ?? 0);
-                    }),
-
-                Forms\Components\Select::make('sekolah_id')
-                    ->label('Sekolah')
-                    ->relationship('sekolah', 'nama_sekolah')
-                    ->visible(fn(callable $get) => !in_array($get('role_type'), ['admin_pusat'])),
-
-                Forms\Components\Select::make('ref_id')
-                    ->label(function (callable $get) {
-                        $roleType = $get('role_type');
-                        return match ($roleType) {
-                            'siswa' => 'Pilih Siswa',
-                            'guru' => 'Pilih Guru',
-                            'dudi' => 'Pilih Dudi',
-                            default => 'Reference ID'
-                        };
-                    })
-                    ->options(function (callable $get) {
-                        $roleType = $get('role_type');
-                        $sekolahId = $get('sekolah_id');
-
-                        return match ($roleType) {
-                            'siswa' => Siswa::when($sekolahId, fn($q) => $q->where('sekolah_id', $sekolahId))
-                                ->pluck('nama_siswa', 'id')->toArray(),
-                            'guru' => Guru::when($sekolahId, fn($q) => $q->where('sekolah_id', $sekolahId))
-                                ->pluck('nama_guru', 'id')->toArray(),
-                            'dudi' => Dudi::when($sekolahId, fn($q) => $q->where('sekolah_id', $sekolahId))
-                                ->pluck('nama_dudi', 'id')->toArray(),
-                            default => []
-                        };
-                    })
-                    ->visible(fn(callable $get) => in_array($get('role_type'), ['siswa', 'guru', 'dudi']))
-                    ->searchable(),
-
-                Forms\Components\TextInput::make('password')
-                    ->password()
-                    ->required(fn($context) => $context === 'create')
-                    ->maxLength(255)
-                    ->dehydrated(fn($state) => filled($state))
-                    ->dehydrateStateUsing(fn($state) => Hash::make($state)),
+                    ->minItems(1)
+                    ->columns(2),
             ]);
+        }
+
+        // Form untuk halaman EDIT (mengubah username/password siswa, guru, dll)
+        return $form->schema([
+            Forms\Components\TextInput::make('name')
+                ->label('Nama Lengkap')
+                ->disabled()
+                ->dehydrated(false),
+            Forms\Components\TextInput::make('username')
+                ->required()
+                ->label('Username')
+                ->unique(ignoreRecord: true),
+            Forms\Components\TextInput::make('password')
+                ->password()
+                ->label('Password Baru (Opsional)')
+                ->dehydrated(fn($state) => filled($state))
+                ->revealable()
+                ->helperText('Isi kolom ini hanya jika Anda ingin mengubah password.'),
+        ]);
     }
 
+    // Mendefinisikan tampilan tabel
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('username')
-                    ->searchable()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('role_type')
-                    ->label('Role Type')
-                    ->formatStateUsing(fn($state) => [
-                        'admin_pusat' => 'Admin Pusat',
-                        'admin_sekolah' => 'Admin Sekolah',
-                        'siswa' => 'Siswa',
-                        'guru' => 'Guru',
-                        'dudi' => 'Dudi Pembimbing',
-                    ][$state] ?? '-')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'admin_pusat' => 'danger',
-                        'admin_sekolah' => 'primary',
-                        'siswa' => 'success',
-                        'guru' => 'warning',
-                        'dudi' => 'info',
-                        default => 'gray',
-                    }),
-
-                Tables\Columns\TextColumn::make('sekolah.nama_sekolah')
-                    ->label('Sekolah')
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('reference_name')
-                    ->label('Reference')
-                    ->getStateUsing(function (User $record) {
-                        return match ($record->role_type) {
-                            'siswa' => Siswa::find($record->ref_id)?->nama_siswa ?? '-',
-                            'guru' => Guru::find($record->ref_id)?->nama_guru ?? '-',
-                            'dudi' => Dudi::find($record->ref_id)?->nama_dudi ?? '-',
-                            default => '-'
-                        };
-                    }),
-            ])
-            ->filters([
-                Tables\Filters\SelectFilter::make('role_type')
-                    ->options([
-                        'admin_pusat' => 'Admin Pusat',
-                        'admin_sekolah' => 'Admin Sekolah',
-                        'siswa' => 'Siswa',
-                        'guru' => 'Guru',
-                        'dudi' => 'Dudi Pembimbing',
-                    ]),
+                Tables\Columns\TextColumn::make('name')->searchable(),
+                Tables\Columns\TextColumn::make('username')->searchable(),
+                Tables\Columns\TextColumn::make('email')->searchable(),
+                Tables\Columns\TextColumn::make('role_type')->label('Role')->badge(),
+                Tables\Columns\TextColumn::make('sekolah.nama_sekolah')->label('Sekolah')->visible(fn() => Auth::user()->isSuperAdmin()),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(function (Model $record): bool {
+                        $user = Auth::user();
+                        
+                        // Admin sekolah dengan ref_id tidak null bisa edit dirinya sendiri dan humas lain
+                        if ($user->isAdminSekolah() && !is_null($user->ref_id)) {
+                            return true;
+                        }
+                        
+                        // User tidak bisa edit dirinya sendiri (kecuali admin sekolah dengan ref_id tidak null)
+                        if ($record->id === $user->id) return false;
+                        
+                        // Humas biasa (ref_id null) tidak bisa edit admin sekolah
+                        if ($user->isAdminSekolah() && is_null($user->ref_id)) {
+                            return $record->role_type !== 'admin_sekolah';
+                        }
+                        
+                        return true;
+                    }),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(function (Model $record): bool {
+                        $user = Auth::user();
+                        if ($record->id === $user->id) return false;
+                        if ($user->isSuperAdmin()) return true;
+
+                        if ($user->isAdminSekolah()) {
+                            if (!is_null($user->ref_id)) return true; // Admin utama
+                            if (is_null($user->ref_id)) { // Humas biasa
+                                return $record->role_type !== 'admin_sekolah';
+                            }
+                        }
+                        return false;
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -189,89 +209,92 @@ class UserResource extends Resource
                 Tables\Actions\Action::make('auto_create_users')
                     ->label('Auto Create Users')
                     ->icon('heroicon-o-user-plus')
+                    ->color('success')
+                    ->visible(fn() => Auth::user()->isAdminSekolah())
                     ->action(function () {
-                        $created = static::autoCreateUsers();
-
-                        Notification::make()
-                            ->title('Auto Create Selesai')
-                            ->body("Berhasil membuat {$created} user baru")
-                            ->success()
-                            ->send();
+                        set_time_limit(0);
+                        $createdCount = self::autoCreateUsers();
+                        if ($createdCount > -1) { // Hanya tampilkan notif jika proses tidak di-cancel
+                            Notification::make()
+                                ->title('Proses Selesai')
+                                ->body("Berhasil membuat {$createdCount} user baru.")
+                                ->success()
+                                ->send();
+                        }
                     })
-                    ->requiresConfirmation()
-                    ->modalHeading('Auto Create Users')
-                    ->modalDescription('Ini akan membuat user otomatis untuk semua siswa, guru, dan dudi yang belum memiliki user account.')
-                    ->modalSubmitActionLabel('Ya, Buat User'),
+                    ->requiresConfirmation(),
             ]);
     }
 
+    // Fungsi untuk membuat user secara otomatis
     public static function autoCreateUsers(): int
     {
-        $created = 0;
+        $user = Auth::user();
+        if (!$user || !$user->sekolah_id) {
+            Notification::make()->title('Aksi Gagal')->body('Anda tidak terasosiasi dengan sekolah.')->danger()->send();
+            return -1;
+        }
 
-        // Auto create untuk siswa
-        $siswasWithoutUser = Siswa::whereDoesntHave('user')->get();
-        foreach ($siswasWithoutUser as $siswa) {
+        $sekolah = Sekolah::find($user->sekolah_id);
+        if (!$sekolah) {
+            Notification::make()->title('Sekolah Tidak Ditemukan')->body('Data sekolah tidak valid.')->danger()->send();
+            return -1;
+        }
+
+        $jumlahUserSaatIni = User::where('sekolah_id', $sekolah->id)->count();
+        $sisaKuota = $sekolah->batas_akun - $jumlahUserSaatIni;
+
+        if ($sisaKuota <= 0) {
+            Notification::make()->title('Kuota Akun Habis')->body('Kuota akun telah terpenuhi. Hubungi Super Admin.')->warning()->send();
+            return 0;
+        }
+
+        $created = 0;
+        $siswas = Siswa::where('sekolah_id', $sekolah->id)->whereDoesntHave('user')->get();
+        foreach ($siswas as $siswa) {
+            if ($created >= $sisaKuota) break;
             User::create([
                 'name' => $siswa->nama_siswa,
                 'username' => $siswa->nis,
-                'email' => $siswa->nis . '@siswa.com',
+                'email' => $siswa->nis . '@siswa.sekolah.com',
                 'password' => Hash::make($siswa->nis),
-                'role_id' => 1,
                 'role_type' => 'siswa',
+                'role_id' => 1,
                 'ref_id' => $siswa->id,
                 'sekolah_id' => $siswa->sekolah_id,
             ]);
             $created++;
         }
 
-        // Auto create untuk guru
-        $gurusWithoutUser = Guru::whereDoesntHave('user')->get();
-        foreach ($gurusWithoutUser as $guru) {
+        $gurus = Guru::where('sekolah_id', $sekolah->id)->whereDoesntHave('user')->get();
+        foreach ($gurus as $guru) {
+            if ($created >= $sisaKuota) break;
             User::create([
                 'name' => $guru->nama_guru,
                 'username' => $guru->nip,
-                'email' => $guru->nip . '@guru.com',
+                'email' => $guru->nip . '@guru.sekolah.com',
                 'password' => Hash::make($guru->nip),
-                'role_id' => 2,
                 'role_type' => 'guru',
+                'role_id' => 2,
                 'ref_id' => $guru->id,
                 'sekolah_id' => $guru->sekolah_id,
             ]);
             $created++;
         }
 
-        // Auto create untuk dudi
-        $dudisWithoutUser = Dudi::whereDoesntHave('user')->get();
-        foreach ($dudisWithoutUser as $dudi) {
-            $username = 'dudi_' . $dudi->id;
-            User::create([
-                'name' => $dudi->nama_dudi,
-                'username' => $username,
-                'email' => $username . '@dudi.com',
-                'password' => Hash::make($username),
-                'role_id' => 3,
-                'role_type' => 'dudi',
-                'ref_id' => $dudi->id,
-                'sekolah_id' => $dudi->sekolah_id,
-            ]);
-            $created++;
+        if ($created < ($siswas->count() + $gurus->count()) && $created > 0) {
+            Notification::make()->title('Kuota Terbatas')->body("Hanya {$created} akun berhasil dibuat karena mencapai batas kuota.")->warning()->send();
         }
 
         return $created;
     }
 
-    public static function getRelations(): array
-    {
-        return [];
-    }
-
+    // Mendefinisikan halaman yang terkait dengan resource ini
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
-            'view' => Pages\ViewUser::route('/{record}'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }

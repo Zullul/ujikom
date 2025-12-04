@@ -1,59 +1,44 @@
 <?php
-// app/Filament/Resources/GuruResource.php
 
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\GuruResource\Pages;
 use App\Models\Guru;
-use App\Models\Sekolah;
+use App\Imports\GuruImport;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Scopes\TahunAjaranScope;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Filament\Tables\Filters\SelectFilter;
 
 class GuruResource extends Resource
 {
     protected static ?string $model = Guru::class;
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
-    protected static ?string $navigationLabel = 'Guru';
-    protected static ?string $label = 'Guru';
+    protected static ?string $navigationLabel = 'Data Guru';
+    protected static ?string $pluralModelLabel = 'Data Guru';
+    protected static ?string $modelLabel = 'Guru';
+    protected static ?string $navigationGroup = 'Manajemen Data';
+    protected static ?int $navigationSort = 3;
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->can('view_guru');
-    }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()->can('create_guru');
-    }
-
-    public static function canEdit($record): bool
-    {
-        return auth()->user()->can('edit_guru');
-    }
-
-    public static function canDelete($record): bool
-    {
-        return auth()->user()->can('delete_guru');
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return auth()->user()->can('view_guru');
+        $user = Auth::user();
+        return $user->isAdminSekolah();
     }
 
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
+        $user = Auth::user();
 
-        // Jika bukan admin pusat, hanya tampilkan data sekolah sendiri
-        if (!auth()->user()->isAdminPusat()) {
-            $query->where('sekolah_id', auth()->user()->sekolah_id);
+        if ($user->isAdminSekolah()) {
+            return $query->where('sekolah_id', $user->sekolah_id);
         }
-
         return $query;
     }
 
@@ -61,36 +46,31 @@ class GuruResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('sekolah_id')
-                    ->label('Sekolah')
-                    ->options(function () {
-                        if (auth()->user()->isAdminPusat()) {
-                            return Sekolah::pluck('nama_sekolah', 'id');
-                        }
-                        return Sekolah::where('id', auth()->user()->sekolah_id)
-                            ->pluck('nama_sekolah', 'id');
-                    })
-                    ->required()
-                    ->default(auth()->user()->sekolah_id)
-                    ->disabled(!auth()->user()->isAdminPusat()),
-
                 Forms\Components\TextInput::make('nama_guru')
                     ->required()
                     ->maxLength(255),
-
                 Forms\Components\TextInput::make('nip')
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255),
-
-                Forms\Components\TextInput::make('kontak')
+                    ->label('NIP')
                     ->required()
                     ->maxLength(255),
 
-                Forms\Components\TextInput::make('jabatan')
-                    ->required()
-                    ->maxLength(255),
+                // sekolah_id dan tahun_ajaran_id akan diisi otomatis
             ]);
+    }
+
+    public static function mutateFormDataBeforeCreate(array $data): array
+    {
+        $user = Auth::user();
+
+        // Ambil sekolah_id dari user yang sedang login
+        $data['sekolah_id'] = $user->sekolah_id;
+
+        // Ambil tahun_ajaran_id dari sesi yang telah dipilih
+        if (session()->has('selected_tahun_ajaran_id')) {
+            $data['tahun_ajaran_id'] = session('selected_tahun_ajaran_id');
+        }
+
+        return $data;
     }
 
     public static function table(Table $table): Table
@@ -100,32 +80,34 @@ class GuruResource extends Resource
                 Tables\Columns\TextColumn::make('sekolah.nama_sekolah')
                     ->label('Sekolah')
                     ->sortable()
-                    ->visible(auth()->user()->isAdminPusat()),
-
-                Tables\Columns\TextColumn::make('nama_guru')
-                    ->searchable()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('nip')
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('kontak'),
-
-                Tables\Columns\TextColumn::make('jabatan'),
+                    ->visible(fn() => !Auth::user()->isAdminSekolah()),
+                Tables\Columns\TextColumn::make('nama_guru')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('tahunAjaran.tahun_ajaran')
+                    ->label('Tahun Ajaran')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('nip')->searchable(),
+                Tables\Columns\TextColumn::make('kontak')
+                ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('jabatan')
+                ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('sekolah')
-                    ->relationship('sekolah', 'nama_sekolah')
-                    ->visible(auth()->user()->isAdminPusat()),
+                // SelectFilter::make('tahunAjaran')
+                //     ->relationship('tahunAjaran', 'tahun_ajaran')
+                //     ->label('Tahun Ajaran')
+                //     ->searchable()
+                //     ->preload(),
             ])
             ->actions([
+                // --- TAMBAHKAN BARIS INI ---
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+            ->bulkActions([  
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
@@ -134,6 +116,7 @@ class GuruResource extends Resource
         return [
             'index' => Pages\ListGurus::route('/'),
             'create' => Pages\CreateGuru::route('/create'),
+            'view' => Pages\ViewGuru::route('/{record}/view'),
             'edit' => Pages\EditGuru::route('/{record}/edit'),
         ];
     }

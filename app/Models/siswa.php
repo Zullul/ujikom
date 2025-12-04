@@ -4,24 +4,45 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Scopes\TahunAjaranScope;
+use Spatie\Activitylog\Traits\LogsActivity; // <-- Tambahkan
+use Spatie\Activitylog\LogOptions;          // <-- Tambahkan
 
 class Siswa extends Model
 {
-    use HasFactory;
+// <-- Tambahkan LogsActivity
+    use HasFactory, LogsActivity;
 
     protected $table = 'siswas';
+    protected $guarded = [];
 
-    protected $fillable = [
-        'nama_siswa',
-        'nis',
-        'tempat_lahir',
-        'tanggal_lahir',
-        'sekolah_id',
-    ];
+    // --- Tambahkan method getActivitylogOptions ---
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['nama_siswa', 'nis', 'jenis_kelamin', 'kelas_id', 'status']) // Log atribut ini
+            ->logOnlyDirty()
+            ->useLogName('Data Siswa')
+            ->setDescriptionForEvent(fn(string $eventName) => $this->generateLogDescription($eventName))
+            ->dontSubmitEmptyLogs();
+    }
 
-    protected $casts = [
-        'tanggal_lahir' => 'date',
-    ];
+    public function generateLogDescription(string $eventName): string
+    {
+        $action = match($eventName) { 'created' => 'membuat', 'updated' => 'memperbarui', 'deleted' => 'menghapus', default => 'melakukan aksi pada' };
+        return "{$action} data siswa: {$this->nama_siswa} (NIS: {$this->nis})";
+    }
+
+    // Relasi ke kelas
+    public function kelas()
+    {
+        return $this->belongsTo(Kelas::class);
+    }
+
+    public function tahunAjaran()
+    {
+        return $this->belongsTo(tahun_ajaran::class);
+    }
 
     public function sekolah()
     {
@@ -69,6 +90,11 @@ class Siswa extends Model
     public function scopeWithoutUser($query)
     {
         return $query->whereDoesntHave('user');
+    }
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TahunAjaranScope);
     }
 
     // Helper method untuk membuat username otomatis

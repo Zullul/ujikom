@@ -9,28 +9,29 @@ class JurnalHarian extends Model
 {
     use HasFactory;
 
-    protected $table = 'jurnal_harian';
+    protected $table = 'jurnal_harians';
 
     protected $fillable = [
-        'prakerin_id',
+        'siswa_id',
         'prakerin_siswa_id',
         'tanggal',
         'kegiatan',
-        'hasil',
-        'kendala',
-        'tindakan_followup',
-        'status_review',
-        'reviewer_role',
-        'reviewer_id'
+        'foto_kegiatan',
+        'diverifikasi_pembimbing_dudi',
+        'catatan_pembimbing_dudi',
+        'diverifikasi_guru_pembimbing',
+        'catatan_guru_pembimbing',
     ];
 
     protected $casts = [
-        'tanggal' => 'date'
+        'tanggal' => 'date',
+        'diverifikasi_pembimbing_dudi' => 'boolean',
+        'diverifikasi_guru_pembimbing' => 'boolean',
     ];
 
-    public function prakerin()
+    public function siswa()
     {
-        return $this->belongsTo(Prakerin::class);
+        return $this->belongsTo(Siswa::class);
     }
 
     public function prakerinSiswa()

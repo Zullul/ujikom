@@ -2,11 +2,13 @@
 
 namespace App\Filament\Pages\Auth;
 
+use Filament\Http\Responses\Auth\LoginResponse;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Pages\Auth\Login as BaseLogin;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Response;
 
 class Login extends BaseLogin
 {
@@ -19,6 +21,19 @@ class Login extends BaseLogin
                 $this->getRememberFormComponent(),
             ])
             ->statePath('data');
+    }
+
+    protected function getLoginResponse(): LoginResponse|Response
+    {
+        $user = auth()->user();
+
+        // Jika user adalah guru atau dudi, arahkan ke halaman pilih tahun ajaran
+        if ($user->isGuru() || $user->isDudiPembimbing()) {
+            return redirect()->route('filament.admin.pages.pilih-tahun-ajaran');
+        }
+
+        // Jika bukan, lanjutkan ke dashboard seperti biasa
+        return parent::getLoginResponse();
     }
 
     protected function getUsernameFormComponent(): Component

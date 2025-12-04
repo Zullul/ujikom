@@ -13,7 +13,7 @@ class GuruObserver
         User::create([
             'name' => $guru->nama_guru,
             'username' => $guru->nip,
-            'email' => $this->generateEmail($guru->nama_guru, $guru->nip),
+            'email' => $this->generateEmail($guru->nama_guru),
             'password' => bcrypt($guru->nip), // Password default = NIP
             'role_id' => 2, // Guru
             'role_type' => 'guru',
@@ -22,9 +22,9 @@ class GuruObserver
         ]);
     }
 
-    private function generateEmail($nama, $nip)
+    private function generateEmail($nama)
     {
         $namaSlug = Str::slug(strtolower($nama));
-        return $namaSlug . '.' . $nip . '@guru.com';
+        return $namaSlug . '.'  . '@guru.com';
     }
 }

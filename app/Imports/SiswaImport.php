@@ -1,92 +1,74 @@
 <?php
+// app/Imports/SiswaImport.php
 
 namespace App\Imports;
 
 use App\Models\Siswa;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
-use Maatwebsite\Excel\Concerns\SkipsFailures;
-use Maatwebsite\Excel\Concerns\WithBatchInserts;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
-use Carbon\Carbon;
 
-class SiswaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure, WithBatchInserts, WithChunkReading
+class SiswaImport implements ToModel, WithHeadingRow
 {
-    use SkipsFailures;
+    private $sekolahId;
+    private $tahunAjaranId;
+    private $kelasMapping;
 
-    protected $sekolah_id;
-
-    public function __construct($sekolah_id)
+    // --- MODIFIKASI CONSTRUCTOR ---
+    public function __construct(int $sekolahId, int $tahunAjaranId, array $kelasMapping)
     {
-        $this->sekolah_id = $sekolah_id;
+        $this->sekolahId = $sekolahId;
+        $this->tahunAjaranId = $tahunAjaranId;
+        $this->kelasMapping = $kelasMapping;
     }
 
+    /**
+     * @param array $row
+     *
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
     public function model(array $row)
     {
-        // Skip rows yang kosong atau header tambahan
-        if (empty($row['Nama']) || empty($row['NIPD']) || $row['Nama'] == 'Nama') {
+        // Normalisasi nama kelas dari CSV (convert XII -> 12, XI -> 11, X -> 10)
+        $kelasFromCsv = trim($row['kelas']);
+        $kelasNormalized = $this->normalizeKelasName($kelasFromCsv);
+        
+        \Log::info("CSV Kelas: '{$kelasFromCsv}' -> Normalized: '{$kelasNormalized}'");
+        
+        // Ambil ID kelas dari mapping berdasarkan nama kelas yang sudah dinormalisasi
+        $kelasId = $this->kelasMapping[$kelasNormalized] ?? null;
+
+        // Jangan impor jika kelas tidak ditemukan
+        if (!$kelasId) {
+            \Log::warning("Kelas '{$kelasFromCsv}' (normalized: '{$kelasNormalized}') tidak ditemukan dalam mapping!");
             return null;
         }
-
-        // Parse tanggal lahir dengan berbagai format
-        $tanggal_lahir = null;
-        if (!empty($row['Tanggal Lahir'])) {
-            try {
-                // Coba format M/d/yyyy (seperti 4/21/2008)
-                $tanggal_lahir = Carbon::createFromFormat('n/j/Y', $row['Tanggal Lahir'])->format('Y-m-d');
-            } catch (\Exception $e) {
-                try {
-                    // Coba format M/d/Y (seperti 4/21/08)
-                    $tanggal_lahir = Carbon::createFromFormat('n/j/y', $row['Tanggal Lahir'])->format('Y-m-d');
-                } catch (\Exception $e) {
-                    try {
-                        // Coba format standar Y-m-d
-                        $tanggal_lahir = Carbon::createFromFormat('Y-m-d', $row['Tanggal Lahir'])->format('Y-m-d');
-                    } catch (\Exception $e) {
-                        try {
-                            // Coba parse otomatis
-                            $tanggal_lahir = Carbon::parse($row['Tanggal Lahir'])->format('Y-m-d');
-                        } catch (\Exception $e) {
-                            $tanggal_lahir = null;
-                        }
-                    }
-                }
-            }
-        }
+        
+        \Log::info("Kelas '{$kelasFromCsv}' matched to ID: {$kelasId}");
 
         return new Siswa([
-            'nama_siswa' => $row['Nama'],
-            'nis' => (string) $row['NIPD'], // Pastikan NIS sebagai string
-            'tanggal_lahir' => $tanggal_lahir,
-            'tempat_lahir' => $row['Tempat Lahir'] ?? '',
-            'sekolah_id' => $this->sekolah_id,
+            'nama_siswa'    => $row['nama_siswa'],
+            'nis'           => $row['nis'],
+            'tempat_lahir'  => $row['tempat_lahir'] ?? null,
+            'tanggal_lahir' => $row['tanggal_lahir'] ?? null,
+            'kelas_id'      => $kelasId,
+            'sekolah_id'    => $this->sekolahId,
+            'tahun_ajaran_id' => $this->tahunAjaranId,
+            'status'        => 'aktif',
         ]);
     }
-
-    public function rules(): array
+    
+    /**
+     * Normalisasi nama kelas: XII -> 12, XI -> 11, X -> 10
+     */
+    private function normalizeKelasName(string $kelas): string
     {
-        return [
-            'Nama' => 'required|string|max:255',
-            'NIPD' => 'required|max:45',
-            'Tempat Lahir' => 'nullable|string|max:255',
-            'Tanggal Lahir' => 'nullable',
-        ];
-    }
-
-    public function headingRow(): int
-    {
-        return 1; // Header ada di baris pertama
-    }
-
-    public function batchSize(): int
-    {
-        return 50;
-    }
-
-    public function chunkSize(): int
-    {
-        return 50;
+        $normalized = strtolower(trim($kelas));
+        
+        // Replace angka romawi dengan angka biasa
+        $normalized = preg_replace('/^xii\s+/', '12 ', $normalized);
+        $normalized = preg_replace('/^xi\s+/', '11 ', $normalized);
+        $normalized = preg_replace('/^x\s+/', '10 ', $normalized);
+        
+        return $normalized;
     }
 }

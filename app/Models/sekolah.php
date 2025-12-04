@@ -1,10 +1,12 @@
 <?php
 // app/Models/Sekolah.php
 
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 
 class Sekolah extends Model
 {
@@ -12,29 +14,36 @@ class Sekolah extends Model
 
     protected $table = 'sekolahs';
 
+
     protected $fillable = [
         'nama_sekolah',
-        'alamat_sekolah',
-        'kontak',
         'nama_kepala_sekolah',
-        'status_sekolah' // aktif, non-aktif
+        'alamat_sekolah',
+        'status_sekolah',
+        'masa_aktif_mulai',   // <-- Tambahkan baris ini
+        'masa_aktif_selesai', // <-- Tambahkan baris ini
+        'is_aktif',           // <-- Tambahkan baris ini
+        'batas_akun',         // <-- Tambahkan baris ini
+        'kuota_bonus',        // <-- Kuota bonus dengan peringatan
     ];
 
+    
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    // ... relasi lainnya ...
+
+    /**
+     * Tambahkan method ini
+     * Mendapatkan user admin yang terkait dengan sekolah ini.
+     */
     public function user()
     {
-        return $this->hasOne(User::class, 'ref_id')->where('role_id', 1);
+        return $this->hasOne(User::class, 'sekolah_id')->where('role_type', 'admin_sekolah');
     }
-
-    public function gurus()
-    {
-        return $this->hasMany(Guru::class);
-    }
-
-    public function kelas()
-    {
-        return $this->hasMany(KelasSiswa::class);
-    }
-
     public function dudis()
     {
         return $this->hasMany(Dudi::class);

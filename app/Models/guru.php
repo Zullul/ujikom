@@ -4,24 +4,42 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Scopes\TahunAjaranScope;
+use Spatie\Activitylog\Traits\LogsActivity; // <-- Tambahkan
+use Spatie\Activitylog\LogOptions;          // <-- Tambahkan
 
 class Guru extends Model
 {
-    use HasFactory;
+    use HasFactory , LogsActivity;
 
     protected $table = 'gurus';
 
-    protected $fillable = [
-        'nama_guru',
-        'nip',
-        'kontak',
-        'jabatan',
-        'sekolah_id'
-    ];
+    protected $guarded = [];
 
+    // --- Tambahkan method getActivitylogOptions ---
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['nama_guru', 'nip', 'jenis_kelamin', 'mata_pelajaran']) // Log atribut ini
+            ->logOnlyDirty()
+            ->useLogName('Data Guru')
+            ->setDescriptionForEvent(fn(string $eventName) => $this->generateLogDescription($eventName))
+            ->dontSubmitEmptyLogs();
+    }
+    public function generateLogDescription(string $eventName): string
+    {
+        $action = match($eventName) { 'created' => 'membuat', 'updated' => 'memperbarui', 'deleted' => 'menghapus', default => 'melakukan aksi pada' };
+        return "{$action} data guru: {$this->nama_guru} (NIP: {$this->nip})";
+    }
+    
     public function sekolah()
     {
         return $this->belongsTo(Sekolah::class);
+    }
+
+    public function tahunAjaran()
+    {
+        return $this->belongsTo(tahun_ajaran::class);
     }
 
     // Tambahkan method ini ke model Guru yang sudah ada
@@ -53,6 +71,11 @@ class Guru extends Model
     public function scopeWithoutUser($query)
     {
         return $query->whereDoesntHave('user');
+    }
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TahunAjaranScope);
     }
 
     // Helper method untuk membuat username otomatis
