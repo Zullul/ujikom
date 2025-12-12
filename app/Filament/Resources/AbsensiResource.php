@@ -247,14 +247,26 @@ class AbsensiResource extends Resource
                             Forms\Components\Placeholder::make('camera_preview')
                                 ->label('Foto Pendukung (Opsional)')
                                 ->content(new \Illuminate\Support\HtmlString(view('filament.actions.camera-capture-izin-sakit')->render())),
-                            Forms\Components\Hidden::make('foto_izin_sakit_data'),
+                            Forms\Components\Hidden::make('foto_izin_sakit_data')
+                                ->id('foto_izin_sakit_data_input')
+                                ->reactive()
+                                ->afterStateUpdated(function ($state) {
+                                    \Log::info('Foto izin/sakit updated:', ['length' => strlen($state ?? '')]);
+                                }),
                         ];
                     })
                     ->action(function (array $data) use ($timezone, $prakerinSiswa) {
+                        // Debug log untuk melihat data yang masuk
+                        \Log::info('Izin/Sakit data received:', [
+                            'has_foto' => isset($data['foto_izin_sakit_data']),
+                            'foto_length' => isset($data['foto_izin_sakit_data']) ? strlen($data['foto_izin_sakit_data']) : 0,
+                        ]);
+                        
                         // Proses simpan foto dari camera capture (base64, opsional)
                         $fotoPath = null;
                         if (isset($data['foto_izin_sakit_data']) && $data['foto_izin_sakit_data']) {
                             $fotoPath = self::simpanFotoBase64($data['foto_izin_sakit_data'], 'absensi/izin-sakit');
+                            \Log::info('Foto path:', ['path' => $fotoPath]);
                         }
                         
                         Absensi::create([
@@ -363,6 +375,8 @@ class AbsensiResource extends Resource
     protected static function simpanFotoBase64(string $base64Data, string $path = 'absensi'): ?string
     {
         try {
+            \Log::info('simpanFotoBase64 called', ['path' => $path, 'data_length' => strlen($base64Data)]);
+            
             // Extract base64 string (remove data:image/jpeg;base64, prefix)
             if (strpos($base64Data, 'data:image') === 0) {
                 $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
@@ -371,6 +385,7 @@ class AbsensiResource extends Resource
             // Decode base64
             $imageData = base64_decode($base64Data);
             if ($imageData === false) {
+                \Log::error('Failed to decode base64');
                 return null;
             }
             
@@ -378,9 +393,12 @@ class AbsensiResource extends Resource
             $filename = uniqid() . '_' . time() . '.jpg';
             $storagePath = storage_path('app/public/' . $path);
             
+            \Log::info('Storage path', ['storagePath' => $storagePath]);
+            
             // Buat folder jika belum ada
             if (!file_exists($storagePath)) {
                 mkdir($storagePath, 0755, true);
+                \Log::info('Created directory', ['path' => $storagePath]);
             }
             
             $fullPath = $storagePath . '/' . $filename;
@@ -388,12 +406,15 @@ class AbsensiResource extends Resource
             // Load image dari string
             $image = imagecreatefromstring($imageData);
             if ($image === false) {
+                \Log::error('Failed to create image from string');
                 return null;
             }
             
             // Simpan dengan kompresi 90%
             imagejpeg($image, $fullPath, 90);
             imagedestroy($image);
+            
+            \Log::info('Image saved successfully', ['fullPath' => $fullPath, 'returnPath' => $path . '/' . $filename]);
             
             return $path . '/' . $filename;
         } catch (\Exception $e) {
