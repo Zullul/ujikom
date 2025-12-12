@@ -28,17 +28,14 @@ class PilihMingguRefleksi extends Page implements HasForms
 
     public static function getNavigationLabel(): string
     {
-        $user = Auth::user();
-        if ($user && $user->isAdminSekolah()) {
-            return 'Laporan Refleksi Mingguan';
-        }
-        return 'Input Refleksi Mingguan';
+        return 'Laporan Refleksi Mingguan';
     }
 
     public static function canAccess(): bool
     {
         $user = Auth::user();
-        return $user->isAdminSekolah() || $user->isGuru() || $user->isDudiPembimbing();
+        // Hanya admin sekolah yang bisa akses halaman ini
+        return $user->isAdminSekolah();
     }
     
     public function form(Form $form): Form
@@ -72,17 +69,12 @@ class PilihMingguRefleksi extends Page implements HasForms
 
     public function mount(): void
     {
-        $user = Auth::user();
+        $this->form->fill();
         
-        // Untuk Admin Sekolah, cek apakah sudah pilih periode
-        if ($user->isAdminSekolah()) {
-            $this->form->fill();
-            
-            // Jika belum pilih periode, jangan load weeks
-            if (!$this->prakerin_id) {
-                $this->weeks = [];
-                return;
-            }
+        // Jika belum pilih periode, jangan load weeks
+        if (!$this->prakerin_id) {
+            $this->weeks = [];
+            return;
         }
         
         $this->loadWeeks();
@@ -105,28 +97,18 @@ class PilihMingguRefleksi extends Page implements HasForms
     public function loadWeeks(): void
     {
         $user = Auth::user();
-        $prakerinSiswaIds = collect();
 
-        if ($user->isAdminSekolah()) {
-            $query = PrakerinSiswa::where('status', 'berjalan')
-                ->whereHas('siswa', function ($query) use ($user) {
-                    $query->where('sekolah_id', $user->sekolah_id);
-                });
-            
-            // Filter berdasarkan periode prakerin jika dipilih
-            if ($this->prakerin_id) {
-                $query->where('prakerin_id', $this->prakerin_id);
-            }
-            
-            $prakerinSiswaIds = $query->pluck('id');
-        } else {
-            $prakerinSiswaIds = PrakerinSiswa::where('status', 'berjalan')
-                ->where(function ($query) use ($user) {
-                    $query->where('guru_pembimbing_id', $user->ref_id)
-                        ->orWhere('dudi_pembimbing_id', $user->ref_id);
-                })
-                ->pluck('id');
+        $query = PrakerinSiswa::where('status', 'berjalan')
+            ->whereHas('siswa', function ($query) use ($user) {
+                $query->where('sekolah_id', $user->sekolah_id);
+            });
+        
+        // Filter berdasarkan periode prakerin jika dipilih
+        if ($this->prakerin_id) {
+            $query->where('prakerin_id', $this->prakerin_id);
         }
+        
+        $prakerinSiswaIds = $query->pluck('id');
 
         if ($prakerinSiswaIds->isEmpty()) {
             $this->weeks = [];

@@ -42,17 +42,17 @@ use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
     // Relasi ke model lain berdasarkan role
     public function siswa()
     {
-        return $this->belongsTo(Siswa::class, 'ref_id')->where('role_id', 1);
+        return $this->belongsTo(Siswa::class, 'ref_id');
     }
 
     public function guru()
     {
-        return $this->belongsTo(Guru::class, 'ref_id')->where('role_id', 2);
+        return $this->belongsTo(Guru::class, 'ref_id');
     }
 
     public function dudi()
     {
-        return $this->belongsTo(Dudi::class, 'ref_id')->where('role_id', 3);
+        return $this->belongsTo(Dudi::class, 'ref_id');
     }
 
     public function sekolah()

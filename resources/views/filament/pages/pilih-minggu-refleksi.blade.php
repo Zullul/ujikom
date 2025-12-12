@@ -1,6 +1,5 @@
 <x-filament-panels::page>
-    @if(Auth::user()->isAdminSekolah())
-        @if(!$prakerin_id)
+    @if(!$prakerin_id)
             {{-- Tampilkan form pilih periode jika belum dipilih --}}
             <x-filament::card>
                 <div class="text-center py-6">
@@ -69,43 +68,6 @@
                 </div>
             </x-filament::card>
         @endif
-    @else
-        {{-- Untuk Guru/Dudi Pembimbing - tampilkan langsung --}}
-        <x-filament::card>
-            <h3 class="text-xl font-bold mb-4">Pilih Minggu untuk Memberi Refleksi</h3>
-
-            <div class="space-y-2">
-                @forelse ($weeks as $week)
-                @php
-                    $url = \App\Filament\Pages\PilihSiswaRefleksi::getUrl([
-                        $week['number'], 
-                        $week['start_date'], 
-                        $week['end_date']
-                    ]);
-                    if (!empty($week['prakerin_id'])) {
-                        $url .= '?prakerin_id=' . $week['prakerin_id'];
-                    }
-                @endphp
-                <a href="{{ $url }}"
-                    class="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors">
-                    <div class="flex items-center justify-between">
-                        <span class="font-medium">{{ $week['label'] }}</span>
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </div>
-                </a>
-                @empty
-                <div class="text-center py-8">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    <p class="mt-4 text-gray-500">Periode Prakerin belum ditentukan atau belum dimulai.</p>
-                </div>
-                @endforelse
-            </div>
-        </x-filament::card>
-    @endif
 
     <x-filament-actions::modals />
 </x-filament-panels::page>

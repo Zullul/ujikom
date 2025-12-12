@@ -199,6 +199,7 @@ class UserResource extends Resource
                         }
                         return false;
                     }),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -256,7 +257,7 @@ class UserResource extends Resource
             User::create([
                 'name' => $siswa->nama_siswa,
                 'username' => $siswa->nis,
-                'email' => $siswa->nis . '@siswa.sekolah.com',
+                'email' => $siswa->nis . '@jurnalpkl.id',
                 'password' => Hash::make($siswa->nis),
                 'role_type' => 'siswa',
                 'role_id' => 1,
@@ -272,7 +273,7 @@ class UserResource extends Resource
             User::create([
                 'name' => $guru->nama_guru,
                 'username' => $guru->nip,
-                'email' => $guru->nip . '@guru.sekolah.com',
+                'email' => $guru->nip . '@jurnalpkl.id',
                 'password' => Hash::make($guru->nip),
                 'role_type' => 'guru',
                 'role_id' => 2,
@@ -296,6 +297,7 @@ class UserResource extends Resource
             'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
+            'view' => Pages\ViewUser::route('/{record}'),
         ];
     }
 }

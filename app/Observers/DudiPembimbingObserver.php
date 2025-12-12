@@ -26,7 +26,7 @@ class DudiPembimbingObserver
         
         // Format: namadepan.nama-dudi
         $username = $namaDepan . '.' . $dudiSlug;
-        $email = $username . '@dudi.pembimbing.com';
+        $email = $username . '@jurnalpkl.id';
         
         // Name: Nama Pembimbing (Nama DUDI)
         $displayName = $namaLengkap . ' (' . $namaDudi . ')';

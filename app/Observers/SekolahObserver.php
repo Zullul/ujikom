@@ -73,6 +73,6 @@ class SekolahObserver
     private function generateEmail($namaSekolah)
     {
         $slug = Str::slug(strtolower($namaSekolah));
-        return $slug . '@admin.sekolah.com';
+        return $slug . '@jurnalpkl.id';
     }
 }

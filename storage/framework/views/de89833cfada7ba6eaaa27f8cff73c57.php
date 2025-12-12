@@ -104,3 +104,4 @@
         <p>📸 Pastikan wajah Anda terlihat jelas</p>
     </div>
 </div>
+<?php /**PATH C:\laragon\www\jurnal-pkl\resources\views/filament/actions/camera-capture-pulang.blade.php ENDPATH**/ ?>

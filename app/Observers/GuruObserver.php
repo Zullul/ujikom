@@ -25,6 +25,6 @@ class GuruObserver
     private function generateEmail($nama)
     {
         $namaSlug = Str::slug(strtolower($nama));
-        return $namaSlug . '.'  . '@guru.com';
+        return $namaSlug . '.'  . '@jurnalpkl.id';
     }
 }

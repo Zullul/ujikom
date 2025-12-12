@@ -25,6 +25,6 @@ class SiswaObserver
 
     private function generateEmail( $nis)
     {
-        return $nis . '@siswa.com';
+        return $nis . '@jurnalpkl.id';
     }
 }

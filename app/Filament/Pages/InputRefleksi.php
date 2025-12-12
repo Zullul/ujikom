@@ -28,7 +28,7 @@ class InputRefleksi extends Page implements HasForms
     public $attendances = [], $dailyJournals = [];
     public bool $isVerified = false;
 
-    public function mount($week_number, $start_date, $end_date, User $student): void
+    public function mount(User $student, $week_number, $start_date, $end_date): void
     {
         $this->student = $student;
         $this->week_number = $week_number;
@@ -147,6 +147,6 @@ class InputRefleksi extends Page implements HasForms
 
     public static function getSlug(): string
     {
-        return 'refleksi-mingguan/input/{week_number}/{start_date}/{end_date}/{student}';
+        return 'refleksi-mingguan/input/{student}/{week_number}/{start_date}/{end_date}';
     }
 }

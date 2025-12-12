@@ -93,7 +93,7 @@
             type="button"
             @click="capturePhoto()"
             x-show="!capturedImage && !skipped"
-            class="px-6 py-3 bg-blue-600 text-white dark:text-white rounded-lg hover:bg-blue-700 transition font-semibold"
+            class="px-6 py-3 bg-blue-100 dark:bg-blue-700 text-blue-900 dark:text-gray-100 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-600 transition font-semibold border-2 border-blue-300 dark:border-blue-600"
         >
             📷 Ambil Foto
         </button>
@@ -102,7 +102,7 @@
             type="button"
             @click="skipPhoto()"
             x-show="!capturedImage && !skipped"
-            class="px-6 py-3 bg-gray-500 text-white dark:text-white rounded-lg hover:bg-gray-600 transition font-semibold"
+            class="px-6 py-3 bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500 transition font-semibold border-2 border-gray-300 dark:border-gray-500"
         >
             ⏭️ Lewati
         </button>
@@ -111,7 +111,7 @@
             type="button"
             @click="retakePhoto()"
             x-show="capturedImage || skipped"
-            class="px-6 py-3 bg-yellow-600 text-white dark:text-white rounded-lg hover:bg-yellow-700 transition font-semibold"
+            class="px-6 py-3 bg-yellow-100 dark:bg-yellow-700 text-yellow-900 dark:text-gray-100 rounded-lg hover:bg-yellow-200 dark:hover:bg-yellow-600 transition font-semibold border-2 border-yellow-300 dark:border-yellow-600"
         >
             🔄 Ulangi
         </button>

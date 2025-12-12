@@ -9,12 +9,12 @@ use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\Actions;
+use Filament\Infolists\Components\Actions\Action;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 
 class ViewLaporanMingguan extends ViewRecord
@@ -101,65 +101,73 @@ class ViewLaporanMingguan extends ViewRecord
                                             ->badge()
                                             ->color('warning')
                                             ->visible(fn ($record) => $record->status_kehadiran === 'hadir'),
-                                        TextEntry::make('foto_masuk')
-                                            ->label('Foto')
-                                            ->formatStateUsing(function ($record) {
-                                                $photos = [];
-                                                
-                                                if ($record->status_kehadiran === 'hadir') {
-                                                    if (!empty($record->foto_masuk)) {
-                                                        $photos[] = '<a href="' . asset('storage/' . $record->foto_masuk) . '" target="_blank" 
-                                                            style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; 
-                                                                   background-color: #2563eb; color: white; border-radius: 6px; 
-                                                                   text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                                                                   transition: all 0.2s ease; margin-right: 8px; font-size: 0.75rem; font-weight: 500;"
-                                                            onmouseover="this.style.backgroundColor=\'#1d4ed8\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.15)\'"
-                                                            onmouseout="this.style.backgroundColor=\'#2563eb\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 2px 4px rgba(0,0,0,0.1)\'"
-                                                            title="Klik untuk melihat foto masuk">
-                                                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                                                                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                                                            </svg>
-                                                            <span>Foto Masuk</span>
-                                                        </a>';
-                                                    }
-                                                    
-                                                    if (!empty($record->foto_pulang)) {
-                                                        $photos[] = '<a href="' . asset('storage/' . $record->foto_pulang) . '" target="_blank" 
-                                                            style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; 
-                                                                   background-color: #ea580c; color: white; border-radius: 6px; 
-                                                                   text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                                                                   transition: all 0.2s ease; margin-right: 8px; font-size: 0.75rem; font-weight: 500;"
-                                                            onmouseover="this.style.backgroundColor=\'#c2410c\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.15)\'"
-                                                            onmouseout="this.style.backgroundColor=\'#ea580c\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 2px 4px rgba(0,0,0,0.1)\'"
-                                                            title="Klik untuk melihat foto pulang">
-                                                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                                                                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                                                            </svg>
-                                                            <span>Foto Pulang</span>
-                                                        </a>';
-                                                    }
-                                                }
-                                                
-                                                if (in_array($record->status_kehadiran, ['izin', 'sakit']) && !empty($record->foto_izin_sakit)) {
-                                                    $photos[] = '<a href="' . asset('storage/' . $record->foto_izin_sakit) . '" target="_blank" 
-                                                        style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; 
-                                                               background-color: #ca8a04; color: white; border-radius: 6px; 
-                                                               text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                                                               transition: all 0.2s ease; margin-right: 8px; font-size: 0.75rem; font-weight: 500;"
-                                                        onmouseover="this.style.backgroundColor=\'#a16207\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px rgba(0,0,0,0.15)\'"
-                                                        onmouseout="this.style.backgroundColor=\'#ca8a04\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 2px 4px rgba(0,0,0,0.1)\'"
-                                                        title="Klik untuk melihat foto pendukung">
-                                                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                                                        </svg>
-                                                        <span>Foto Bukti</span>
-                                                    </a>';
-                                                }
-                                                
-                                                return !empty($photos) ? '<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">' . implode('', $photos) . '</div>' : '<span style="color: #9ca3af; font-size: 0.75rem; font-style: italic;">Tidak ada foto</span>';
-                                            })
-                                            ->html()
-                                            ->columnSpan(2),
+                                        
+                                        // --- BAGIAN BUTTON MODAL POP-UP ---
+                                        Actions::make([
+                                            // Action Foto Masuk
+                                            Action::make('lihat_foto_masuk')
+                                                ->label('Foto Masuk')
+                                                ->icon('heroicon-o-camera')
+                                                ->color('info')
+                                                ->visible(fn ($record) => $record->status_kehadiran === 'hadir' && !empty($record->foto_masuk))
+                                                ->modalHeading('Dokumentasi Foto Masuk')
+                                                ->modalContent(fn ($record) => new HtmlString('
+                                                    <div style="display: flex; justify-content: center; align-items: center; background-color: #f3f4f6; padding: 10px; border-radius: 8px;">
+                                                        <img 
+                                                            src="'.Storage::url($record->foto_masuk).'" 
+                                                            alt="Foto Masuk" 
+                                                            style="max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 4px;"
+                                                        >
+                                                    </div>
+                                                '))
+                                                ->modalSubmitAction(false)
+                                                ->modalCancelAction(false)
+                                                ->closeModalByClickingAway(true),
+
+                                            // Action Foto Pulang
+                                            Action::make('lihat_foto_pulang')
+                                                ->label('Foto Pulang')
+                                                ->icon('heroicon-o-camera')
+                                                ->color('warning')
+                                                ->visible(fn ($record) => $record->status_kehadiran === 'hadir' && !empty($record->foto_pulang))
+                                                ->modalHeading('Dokumentasi Foto Pulang')
+                                                ->modalContent(fn ($record) => new HtmlString('
+                                                    <div style="display: flex; justify-content: center; align-items: center; background-color: #f3f4f6; padding: 10px; border-radius: 8px;">
+                                                        <img 
+                                                            src="'.Storage::url($record->foto_pulang).'" 
+                                                            alt="Foto Pulang" 
+                                                            style="max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 4px;"
+                                                        >
+                                                    </div>
+                                                '))
+                                                ->modalSubmitAction(false)
+                                                ->modalCancelAction(false)
+                                                ->closeModalByClickingAway(true),
+
+                                            // Action Foto Bukti (Izin/Sakit)
+                                            Action::make('lihat_foto_bukti')
+                                                ->label('Foto Bukti')
+                                                ->icon('heroicon-o-document-text')
+                                                ->color('danger')
+                                                ->visible(fn ($record) => in_array($record->status_kehadiran, ['izin', 'sakit']) && !empty($record->foto_izin_sakit))
+                                                ->modalHeading('Bukti Izin/Sakit')
+                                                ->modalContent(fn ($record) => new HtmlString('
+                                                    <div style="display: flex; justify-content: center; align-items: center; background-color: #f3f4f6; padding: 10px; border-radius: 8px;">
+                                                        <img 
+                                                            src="'.Storage::url($record->foto_izin_sakit).'" 
+                                                            alt="Foto Bukti" 
+                                                            style="max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 4px;"
+                                                        >
+                                                    </div>
+                                                '))
+                                                ->modalSubmitAction(false)
+                                                ->modalCancelAction(false)
+                                                ->closeModalByClickingAway(true),
+                                        ])
+                                        ->columnSpan(2)
+                                        ->alignStart(),
+                                        // --- AKHIR BAGIAN BUTTON MODAL ---
+
                                     ]),
                                 TextEntry::make('keterangan')
                                     ->label('Keterangan')

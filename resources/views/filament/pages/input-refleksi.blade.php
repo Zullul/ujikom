@@ -8,10 +8,10 @@
         </div>
         <x-filament::button
             tag="a"
-            href="{{ url()->previous() }}"
+            href="{{ \App\Filament\Pages\PilihMingguPerSiswa::getUrl([$student->id]) }}"
             icon="heroicon-o-arrow-left"
             color="gray">
-            Kembali ke Pilih Siswa
+            Kembali ke Pilih Minggu
         </x-filament::button>
     </div>
 
@@ -68,19 +68,14 @@
 
                                 {{-- Tombol Foto Bukti (Izin/Sakit) --}}
                                 @if (in_array($attendance->status_kehadiran, ['izin', 'sakit']) && !empty($attendance->foto_izin_sakit))
-                                    <a href="{{ asset('storage/' . $attendance->foto_izin_sakit) }}" target="_blank" 
-                                        style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; 
-                                               background-color: #ca8a04; color: white; border-radius: 6px; 
-                                               text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                                               transition: all 0.2s ease; font-size: 0.7rem; font-weight: 500;"
-                                        onmouseover="this.style.backgroundColor='#a16207'; this.style.transform='translateY(-2px)'"
-                                        onmouseout="this.style.backgroundColor='#ca8a04'; this.style.transform='translateY(0)'"
+                                    <x-filament::button
+                                        size="xs"
+                                        color="danger"
+                                        icon="heroicon-o-camera"
+                                        x-on:click="$dispatch('open-modal', { id: 'foto-bukti-{{ $attendance->id }}' })"
                                         title="Klik untuk melihat foto bukti">
-                                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                                        </svg>
-                                        <span>Bukti</span>
-                                    </a>
+                                        Bukti
+                                    </x-filament::button>
                                 @endif
 
                                 {{-- Tombol Alasan (Izin/Sakit) --}}
@@ -197,7 +192,7 @@
         @endif
     @endforeach
 
-    {{-- MODAL FOTO MASUK / PULANG UNTUK SETIAP ABSENSI --}}
+    {{-- MODAL FOTO MASUK / PULANG / BUKTI UNTUK SETIAP ABSENSI --}}
     @foreach ($attendances as $attendance)
         @if ($attendance->status_kehadiran === 'hadir')
             @if (!empty($attendance->foto_masuk))
@@ -227,6 +222,21 @@
                     </x-slot>
                 </x-filament::modal>
             @endif
+        @endif
+
+        {{-- Modal Foto Bukti Izin/Sakit --}}
+        @if (in_array($attendance->status_kehadiran, ['izin', 'sakit']) && !empty($attendance->foto_izin_sakit))
+            <x-filament::modal id="foto-bukti-{{ $attendance->id }}" width="3xl">
+                <x-slot name="heading">
+                    Foto Bukti {{ ucfirst($attendance->status_kehadiran) }} - {{ \Carbon\Carbon::parse($attendance->tanggal)->translatedFormat('l, d M Y') }}
+                </x-slot>
+                <div class="w-full">
+                    <img src="{{ asset('storage/' . $attendance->foto_izin_sakit) }}" alt="Foto Bukti" class="max-w-full h-auto rounded-md" />
+                </div>
+                <x-slot name="footer">
+                    <x-filament::button color="gray" x-on:click="close">Tutup</x-filament::button>
+                </x-slot>
+            </x-filament::modal>
         @endif
     @endforeach
 
