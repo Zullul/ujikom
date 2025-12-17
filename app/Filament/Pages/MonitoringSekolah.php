@@ -29,9 +29,19 @@ class MonitoringSekolah extends Page
     // Ambil data saat halaman dimuat
     public function mount(): void
     {
-        // Ambil data sekolah dengan menghitung relasi 'dudis' dan 'users'
-        // Gunakan withoutGlobalScope jika ada scope default yang mungkin mengganggu (misal: TahunAjaranScope)
-        // Sesuaikan nama relasi 'dudis' jika berbeda di model Sekolah Anda
-        $this->sekolahs = Sekolah::withCount(['dudis', 'users'])->get();
+        // Ambil parameter pencarian dari query string
+        $search = trim((string) request()->query('search', ''));
+
+        // Ambil data sekolah + hitung relasi, lalu terapkan filter pencarian jika ada
+        $this->sekolahs = Sekolah::withCount(['dudis', 'users'])
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama_sekolah', 'like', "%{$search}%")
+                      ->orWhere('alamat_sekolah', 'like', "%{$search}%")
+                      ->orWhere('nama_kepala_sekolah', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('nama_sekolah')
+            ->get();
     }
 }

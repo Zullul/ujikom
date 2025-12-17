@@ -116,10 +116,9 @@ class DudiResource extends Resource
                 Forms\Components\TextInput::make('alamat')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('telepon')
-                    ->tel()
+                Forms\Components\TextInput::make('bidang_usaha')
                     ->maxLength(255),
-                Forms\Components\TextInput::make('nama_pimpinan')
+                Forms\Components\TextInput::make('pimpinan')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('instruktur')
                     ->maxLength(255),
@@ -146,11 +145,6 @@ class DudiResource extends Resource
                     ->visible(fn() => $user->isAdminSekolah()),
                 Tables\Columns\TextColumn::make('instruktur')
                     ->searchable()
-                    ->visible(fn() => $user->isAdminSekolah()),
-                Tables\Columns\TextColumn::make('sekolah.nama_sekolah')
-                    ->label('Sekolah')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false)
                     ->visible(fn() => $user->isAdminSekolah()),
                 
                 // Tambah kolom status lokasi
