@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Nov 28, 2025 at 10:52 PM
+-- Generation Time: Dec 17, 2025 at 08:56 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.2.29
 
@@ -49,7 +49,8 @@ CREATE TABLE `absensis` (
 --
 
 INSERT INTO `absensis` (`id`, `siswa_id`, `prakerin_siswa_id`, `tanggal`, `jam_masuk`, `jam_pulang`, `status_kehadiran`, `keterangan`, `foto_masuk`, `foto_pulang`, `foto_izin_sakit`, `diverifikasi_pembimbing_dudi`, `created_at`, `updated_at`) VALUES
-(46, 2099, 88, '2025-11-29', '05:28:29', '05:29:13', 'hadir', NULL, 'absensi/masuk/692a220d96c52_1764368909.jpg', 'absensi/pulang/692a2239064e1_1764368953.jpg', NULL, 0, '2025-11-28 22:28:29', '2025-11-28 22:29:13');
+(46, 2099, 88, '2025-11-29', '05:28:29', '05:29:13', 'hadir', NULL, 'absensi/masuk/692a220d96c52_1764368909.jpg', 'absensi/pulang/692a2239064e1_1764368953.jpg', NULL, 0, '2025-11-28 22:28:29', '2025-11-28 22:29:13'),
+(56, 2100, 90, '2025-12-12', '19:58:08', '19:59:02', 'hadir', NULL, 'absensi/masuk/693c116004274_1765544288.jpg', 'absensi/pulang/693c11963efde_1765544342.jpg', NULL, 0, '2025-12-12 12:58:08', '2025-12-12 12:59:02');
 
 -- --------------------------------------------------------
 
@@ -238,7 +239,19 @@ INSERT INTO `activity_log` (`id`, `log_name`, `description`, `subject_type`, `ev
 (158, 'Data Kelas', 'menghapus data kelas: 12 Rekayasa 2', 'App\\Models\\Kelas', 'deleted', 53, 'App\\Models\\User', 1575, '{\"old\": {\"nama_kelas\": \"12 Rekayasa 2\", \"kompetensi_keahlian\": null}}', NULL, '2025-11-10 01:48:12', '2025-11-10 01:48:12'),
 (159, 'Data Prakerin', 'memperbarui data prakerin: Test (2025/2026)', 'App\\Models\\Prakerin', 'updated', 12, 'App\\Models\\User', 1575, '{\"old\": {\"ketua\": \"Amba\"}, \"attributes\": {\"ketua\": \"Test\"}}', NULL, '2025-11-10 01:54:24', '2025-11-10 01:54:24'),
 (160, 'Data Prakerin Siswa', 'membuat data prakerin siswa: test (No SK: 73598582)', 'App\\Models\\PrakerinSiswa', 'created', 88, 'App\\Models\\User', 1575, '{\"attributes\": {\"no_sk\": \"73598582\", \"status\": \"berjalan\", \"dudi_id\": 14, \"siswa_id\": 2099, \"prakerin_id\": 12, \"dudi_pembimbing_id\": 31, \"guru_pembimbing_id\": 177, \"hari_kerja_per_minggu\": 5}}', NULL, '2025-11-10 01:55:31', '2025-11-10 01:55:31'),
-(161, 'Akun Pengguna', 'melakukan aksi pada data akun pengguna: TESTING (Username: TESTING123)', 'App\\Models\\User', 'created', 1586, 'App\\Models\\User', 1575, '{\"attributes\": {\"username\": \"TESTING123\"}}', NULL, '2025-11-10 02:23:49', '2025-11-10 02:23:49');
+(161, 'Akun Pengguna', 'melakukan aksi pada data akun pengguna: TESTING (Username: TESTING123)', 'App\\Models\\User', 'created', 1586, 'App\\Models\\User', 1575, '{\"attributes\": {\"username\": \"TESTING123\"}}', NULL, '2025-11-10 02:23:49', '2025-11-10 02:23:49'),
+(162, 'Data Siswa', 'membuat data siswa: jk (NIS: 6758)', 'App\\Models\\Siswa', 'created', 2100, 'App\\Models\\User', 1575, '{\"attributes\": {\"nis\": \"6758\", \"status\": \"aktif\", \"kelas_id\": 49, \"nama_siswa\": \"jk\", \"jenis_kelamin\": null}}', NULL, '2025-12-08 04:38:01', '2025-12-08 04:38:01'),
+(163, 'Akun Pengguna', 'melakukan aksi pada data akun pengguna: jk (Username: 6758)', 'App\\Models\\User', 'created', 1587, 'App\\Models\\User', 1575, '{\"attributes\": {\"username\": \"6758\"}}', NULL, '2025-12-08 04:38:02', '2025-12-08 04:38:02'),
+(164, 'Data Dudi Pembimbing', 'membuat data dudi pembimbing: Malik (Dudi ID: 16)', 'App\\Models\\DudiPembimbing', 'created', 36, 'App\\Models\\User', 1575, '{\"attributes\": {\"dudi_id\": 16, \"jabatan\": null, \"nama_pembimbing\": \"Malik\"}}', NULL, '2025-12-08 04:38:30', '2025-12-08 04:38:30'),
+(165, 'Akun Pengguna', 'melakukan aksi pada data akun pengguna: Malik (Prilude Studio) (Username: malik.prilude-studio)', 'App\\Models\\User', 'created', 1588, 'App\\Models\\User', 1575, '{\"attributes\": {\"username\": \"malik.prilude-studio\"}}', NULL, '2025-12-08 04:38:31', '2025-12-08 04:38:31'),
+(166, 'Data Prakerin Siswa', 'membuat data prakerin siswa: jk (No SK: 34529789)', 'App\\Models\\PrakerinSiswa', 'created', 89, 'App\\Models\\User', 1575, '{\"attributes\": {\"no_sk\": \"34529789\", \"status\": \"berjalan\", \"dudi_id\": 16, \"siswa_id\": 2100, \"prakerin_id\": 13, \"dudi_pembimbing_id\": 36, \"guru_pembimbing_id\": 177, \"hari_kerja_per_minggu\": 5}}', NULL, '2025-12-08 04:39:22', '2025-12-08 04:39:22'),
+(167, 'Akun Pengguna', 'melakukan aksi pada data akun pengguna: Admin SMA TEST (Username: sma_test)', 'App\\Models\\User', 'created', 1589, 'App\\Models\\User', 1, '{\"attributes\": {\"username\": \"sma_test\"}}', NULL, '2025-12-09 07:43:14', '2025-12-09 07:43:14'),
+(168, 'Data Prakerin', 'menghapus data prakerin: Swang (2025/2026)', 'App\\Models\\Prakerin', 'deleted', 13, 'App\\Models\\User', 1575, '{\"old\": {\"ketua\": \"Swang\", \"no_sk\": \"69\", \"keterangan\": \"Program Prakerin 2025/2026 Gelombang 2\", \"sekolah_id\": 6, \"sekretaris\": \"Low\", \"tanggal_mulai\": \"2025-11-30T17:00:00.000000Z\", \"tahun_ajaran_id\": 1, \"tanggal_selesai\": \"2025-12-11T17:00:00.000000Z\"}}', NULL, '2025-12-12 09:57:01', '2025-12-12 09:57:01'),
+(169, 'Data Prakerin', 'membuat data prakerin: Testing (2025/2026)', 'App\\Models\\Prakerin', 'created', 14, 'App\\Models\\User', 1575, '{\"attributes\": {\"ketua\": \"Testing\", \"no_sk\": \"43867209674209\", \"keterangan\": \"Prakerin Gelombang 2 Tahun 2025/2026\", \"sekolah_id\": 6, \"sekretaris\": \"Testing\", \"tanggal_mulai\": \"2025-12-11T17:00:00.000000Z\", \"tahun_ajaran_id\": 1, \"tanggal_selesai\": \"2025-12-30T17:00:00.000000Z\"}}', NULL, '2025-12-12 09:57:55', '2025-12-12 09:57:55'),
+(170, 'Data Prakerin Siswa', 'membuat data prakerin siswa: jk (No SK: 3452)', 'App\\Models\\PrakerinSiswa', 'created', 90, 'App\\Models\\User', 1575, '{\"attributes\": {\"no_sk\": \"3452\", \"status\": \"berjalan\", \"dudi_id\": 16, \"siswa_id\": 2100, \"prakerin_id\": 14, \"dudi_pembimbing_id\": 36, \"guru_pembimbing_id\": 177, \"hari_kerja_per_minggu\": 5}}', NULL, '2025-12-12 09:58:44', '2025-12-12 09:58:44'),
+(171, 'Data Dudi', 'membuat data dudi: test (Pimpinan: )', 'App\\Models\\Dudi', 'created', 17, 'App\\Models\\User', 1575, '{\"attributes\": {\"alamat\": \"test\", \"no_telp\": null, \"nama_dudi\": \"test\", \"nama_pimpinan\": null}}', NULL, '2025-12-16 09:59:32', '2025-12-16 09:59:32'),
+(172, 'Data Dudi Pembimbing', 'membuat data dudi pembimbing: test (Dudi ID: 17)', 'App\\Models\\DudiPembimbing', 'created', 37, 'App\\Models\\User', 1575, '{\"attributes\": {\"dudi_id\": 17, \"jabatan\": null, \"nama_pembimbing\": \"test\"}}', NULL, '2025-12-16 09:59:33', '2025-12-16 09:59:33'),
+(173, 'Akun Pengguna', 'melakukan aksi pada data akun pengguna: test (test) (Username: test.test)', 'App\\Models\\User', 'created', 1590, 'App\\Models\\User', 1575, '{\"attributes\": {\"username\": \"test.test\"}}', NULL, '2025-12-16 09:59:33', '2025-12-16 09:59:33');
 
 -- --------------------------------------------------------
 
@@ -270,7 +283,8 @@ INSERT INTO `dudis` (`id`, `sekolah_id`, `tahun_ajaran_id`, `nama_dudi`, `bidang
 (11, 5, 1, 'Robotic School', 'Robotic', 'Bantul', '-7.3700390', '108.5408452', 100, 'Joe', 'Ibnu', '2025-10-23 10:35:43', '2025-10-25 13:23:42'),
 (12, 5, 1, 'Access Media', 'IT Software', 'Tasikmalaya', NULL, NULL, 100, 'Yana', 'Ayu', '2025-10-23 10:36:22', '2025-10-23 10:36:22'),
 (14, 6, 1, 'Disnaker Banjar', 'Kedinasan', 'Banjar', '-7.3703263', '108.5404565', 100, 'Iriana', 'Asep', '2025-11-07 14:32:58', '2025-11-28 22:23:02'),
-(16, 6, 1, 'Prilude Studio', 'IT Software', 'Tasikmalaya', '-7.3269248', '108.2097664', 100, 'Nanda', 'Lily', '2025-11-07 16:46:01', '2025-11-09 04:16:10');
+(16, 6, 1, 'Prilude Studio', 'IT Software', 'Tasikmalaya', '-7.3700504', '108.5407874', 100, 'Nanda', 'Lily', '2025-11-07 16:46:01', '2025-12-08 04:41:42'),
+(17, 6, 1, 'test', 'test', 'test', '-7.3367552', '108.2228736', 100, 'test', 'test', '2025-12-16 09:59:32', '2025-12-16 10:01:25');
 
 -- --------------------------------------------------------
 
@@ -298,7 +312,9 @@ INSERT INTO `dudi_pembimbings` (`id`, `dudi_id`, `tahun_ajaran_id`, `nama_pembim
 (25, 12, 1, 'malik', '2025-10-23 10:37:21', '2025-10-23 10:37:21'),
 (31, 14, 1, 'Asep', '2025-11-07 14:32:58', '2025-11-07 14:32:58'),
 (32, 14, 1, 'Malik', '2025-11-07 15:22:40', '2025-11-07 15:22:40'),
-(35, 16, 1, 'Lily', '2025-11-07 16:46:01', '2025-11-07 16:46:01');
+(35, 16, 1, 'Lily', '2025-11-07 16:46:01', '2025-11-07 16:46:01'),
+(36, 16, 1, 'Malik', '2025-12-08 04:38:30', '2025-12-08 04:38:30'),
+(37, 17, 1, 'test', '2025-12-16 09:59:33', '2025-12-16 09:59:33');
 
 -- --------------------------------------------------------
 
@@ -456,7 +472,8 @@ CREATE TABLE `jurnal_harians` (
 --
 
 INSERT INTO `jurnal_harians` (`id`, `siswa_id`, `prakerin_siswa_id`, `tanggal`, `kegiatan`, `diverifikasi_pembimbing_dudi`, `catatan_pembimbing_dudi`, `diverifikasi_guru_pembimbing`, `catatan_guru_pembimbing`, `created_at`, `updated_at`) VALUES
-(24, 2099, 88, '2025-11-29', '<p>rjeiwohgkobeqrkohyi34hrgjrsnbvioerwhtewiobnknweiohtigewhinbiewgioeohteiwngewihtiowhtewiohgeskngiowehgwier</p>', 0, NULL, 0, NULL, '2025-11-28 22:30:10', '2025-11-28 22:30:10');
+(24, 2099, 88, '2025-11-29', '<p>rjeiwohgkobeqrkohyi34hrgjrsnbvioerwhtewiobnknweiohtigewhinbiewgioeohteiwngewihtiowhtewiohgeskngiowehgwier</p>', 0, NULL, 0, NULL, '2025-11-28 22:30:10', '2025-11-28 22:30:10'),
+(27, 2100, 90, '2025-12-12', '<p>Test Untuk Penggunaan Fitur Cetak Jurnal Harian</p>', 0, NULL, 0, NULL, '2025-12-12 12:58:47', '2025-12-12 12:58:47');
 
 -- --------------------------------------------------------
 
@@ -582,7 +599,10 @@ INSERT INTO `laporan_mingguans` (`id`, `prakerin_siswa_id`, `minggu_ke`, `siswa_
 (125, 88, 1, 2099, '2025-11-07', '2025-11-13', NULL, 0, NULL, 0, '2025-11-10 01:55:31', '2025-11-10 01:55:31'),
 (126, 88, 2, 2099, '2025-11-14', '2025-11-20', NULL, 0, NULL, 0, '2025-11-10 01:55:31', '2025-11-10 01:55:31'),
 (127, 88, 3, 2099, '2025-11-21', '2025-11-27', NULL, 0, NULL, 0, '2025-11-10 01:55:31', '2025-11-10 01:55:31'),
-(128, 88, 4, 2099, '2025-11-28', '2025-11-30', NULL, 0, NULL, 0, '2025-11-10 01:55:31', '2025-11-10 01:55:31');
+(128, 88, 4, 2099, '2025-11-28', '2025-11-30', NULL, 0, NULL, 0, '2025-11-10 01:55:31', '2025-11-10 01:55:31'),
+(131, 90, 1, 2100, '2025-12-12', '2025-12-18', NULL, 0, NULL, 0, '2025-12-12 09:58:44', '2025-12-12 09:58:44'),
+(132, 90, 2, 2100, '2025-12-19', '2025-12-25', NULL, 0, NULL, 0, '2025-12-12 09:58:44', '2025-12-12 09:58:44'),
+(133, 90, 3, 2100, '2025-12-26', '2025-12-31', NULL, 0, NULL, 0, '2025-12-12 09:58:44', '2025-12-12 09:58:44');
 
 -- --------------------------------------------------------
 
@@ -741,7 +761,9 @@ CREATE TABLE `penilaian_details` (
 
 INSERT INTO `penilaian_details` (`id`, `penilaian_pkl_id`, `tujuan_pembelajaran_id`, `skor_guru`, `skor_dudi`, `created_at`, `updated_at`) VALUES
 (36, 8, 8, 76, 88, '2025-11-08 15:24:09', '2025-11-08 15:27:27'),
-(37, 8, 9, 89, 58, '2025-11-08 15:24:09', '2025-11-08 15:27:27');
+(37, 8, 9, 89, 58, '2025-11-08 15:24:09', '2025-11-08 15:27:27'),
+(38, 9, 8, 86, 77, '2025-12-12 11:55:08', '2025-12-12 12:14:23'),
+(39, 9, 9, 79, 89, '2025-12-12 11:55:08', '2025-12-12 12:14:23');
 
 -- --------------------------------------------------------
 
@@ -771,7 +793,8 @@ CREATE TABLE `penilaian_pkls` (
 --
 
 INSERT INTO `penilaian_pkls` (`id`, `prakerin_siswa_id`, `skor_guru`, `keterangan_guru`, `grade_guru`, `dinilai_oleh_guru_id`, `tanggal_dinilai_guru`, `skor_dudi`, `keterangan_dudi`, `grade_dudi`, `dinilai_oleh_dudi_id`, `tanggal_dinilai_dudi`, `created_at`, `updated_at`) VALUES
-(8, 86, 83, NULL, 'B', 1578, '2025-11-08 15:24:09', 73, NULL, 'C', 1582, '2025-11-08 15:27:27', '2025-11-08 15:24:09', '2025-11-08 15:27:27');
+(8, 86, 83, NULL, 'B', 1578, '2025-11-08 15:24:09', 73, NULL, 'C', 1582, '2025-11-08 15:27:27', '2025-11-08 15:24:09', '2025-11-08 15:27:27'),
+(9, 90, 83, NULL, 'B', 1579, '2025-12-12 12:14:23', 83, NULL, 'B', 1588, '2025-12-12 11:55:08', '2025-12-12 11:55:07', '2025-12-12 12:14:23');
 
 -- --------------------------------------------------------
 
@@ -883,7 +906,7 @@ INSERT INTO `prakerins` (`id`, `ketua`, `sekretaris`, `tanggal_mulai`, `tanggal_
 (10, 'sela', 'sely', '2025-11-04 17:00:00', '2025-11-17 17:00:00', 'Prakerin Gelombang 1 2025/2026', '73598582', 5, 1, '2025-11-05 01:39:49', '2025-11-05 01:39:49'),
 (11, 'lsjfweoghwipg', 'nuirwthiewhgowi', '2025-11-19 17:00:00', '2025-11-29 17:00:00', 'Prakerin Gelombang 2 2025/2026', '3452', 5, 1, '2025-11-05 01:46:20', '2025-11-05 01:46:20'),
 (12, 'Test', 'Ambacaf', '2025-11-06 17:00:00', '2025-11-29 17:00:00', 'Program Prakerin 2025/2026 Gelombang 1', '8327538920', 6, 1, '2025-11-07 16:51:52', '2025-11-10 01:54:24'),
-(13, 'Swang', 'Low', '2025-11-30 17:00:00', '2025-12-11 17:00:00', 'Program Prakerin 2025/2026 Gelombang 2', '69', 6, 1, '2025-11-07 16:53:01', '2025-11-07 16:53:01');
+(14, 'Testing', 'Testing', '2025-12-11 17:00:00', '2025-12-30 17:00:00', 'Prakerin Gelombang 2 Tahun 2025/2026', '43867209674209', 6, 1, '2025-12-12 09:57:55', '2025-12-12 09:57:55');
 
 -- --------------------------------------------------------
 
@@ -920,7 +943,8 @@ INSERT INTO `prakerin_siswas` (`id`, `prakerin_id`, `siswa_id`, `dudi_id`, `dudi
 (85, 11, 2077, 12, 25, 110, 'berjalan', '73598582', 5, '2025-11-05 01:48:07', '2025-11-05 01:48:07'),
 (86, 12, 2097, 16, 35, 176, 'berjalan', '83275209', 5, '2025-11-07 17:10:07', '2025-11-07 17:10:07'),
 (87, 12, 2098, 16, 35, 176, 'berjalan', '83275209', 5, '2025-11-07 17:10:07', '2025-11-07 17:10:07'),
-(88, 12, 2099, 14, 31, 177, 'berjalan', '73598582', 5, '2025-11-10 01:55:31', '2025-11-10 01:55:31');
+(88, 12, 2099, 14, 31, 177, 'berjalan', '73598582', 5, '2025-11-10 01:55:31', '2025-11-10 01:55:31'),
+(90, 14, 2100, 16, 36, 177, 'berjalan', '3452', 5, '2025-12-12 09:58:44', '2025-12-12 09:58:44');
 
 -- --------------------------------------------------------
 
@@ -1050,8 +1074,9 @@ CREATE TABLE `sekolahs` (
 
 INSERT INTO `sekolahs` (`id`, `nama_sekolah`, `status_sekolah`, `masa_aktif_mulai`, `masa_aktif_selesai`, `is_aktif`, `batas_akun`, `kuota_bonus`, `alamat_sekolah`, `nama_kepala_sekolah`, `created_at`, `updated_at`) VALUES
 (5, 'SMKN 1 BANJAR', 'negeri', '2025-10-14', '2025-11-13', 1, 620, 50, 'Jl.Kyai Haji Mustopa', 'Dede Ruslianto', '2025-09-21 23:35:02', '2025-11-06 14:18:05'),
-(6, 'SMA NEGERI PULAUKELAPA', 'negeri', '2025-11-06', '2025-11-30', 1, 50, 50, 'Jln Pulau Kelapa', 'Dara Syifa', '2025-11-06 14:23:12', '2025-11-06 14:23:12'),
-(7, 'SEKOLAH TEST', 'negeri', '2025-11-09', '2025-11-19', 1, 50, 50, 'TEST', 'TEST', '2025-11-09 14:23:18', '2025-11-09 14:23:18');
+(6, 'SMA NEGERI PULAUKELAPA', 'negeri', '2025-11-06', '2026-11-30', 1, 50, 50, 'Jln Pulau Kelapa', 'Dara Syifa', '2025-11-06 14:23:12', '2025-12-08 04:35:09'),
+(7, 'SEKOLAH TEST', 'negeri', '2025-11-09', '2025-11-19', 1, 50, 50, 'TEST', 'TEST', '2025-11-09 14:23:18', '2025-11-09 14:23:18'),
+(8, 'SMA TEST', 'negeri', '2025-12-09', '2026-12-09', 1, 5000, 50, 'SMA TEST', 'SMA TEST', '2025-12-09 07:43:13', '2025-12-09 07:43:21');
 
 -- --------------------------------------------------------
 
@@ -1073,8 +1098,12 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('6SJaMNPzmA7uKEFiWXKU5Lk0jHnC0X9GIxFZKPAF', 1583, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo3OntzOjY6Il90b2tlbiI7czo0MDoiZnFGeVZWd1I5TDRzaENPSFFZMEVNWmFkUjJYSVU4ODVjNXFNU2Y5NyI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjQyOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYWRtaW4vanVybmFsLWhhcmlhbnMiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxNTgzO3M6MTc6InBhc3N3b3JkX2hhc2hfd2ViIjtzOjYwOiIkMnkkMTIkdmRxNGF6VXdId1Y4Yy9wY3puNHBFLmtNQUlPQy51OWxwTEFuVFVhY0Z1aXhFV05YZFZDWGkiO3M6ODoiZmlsYW1lbnQiO2E6MDp7fX0=', 1764369052),
-('wolOvjvr0xeKo1TVxQxMy8fSZcKZXOERsY8hsXfX', 1580, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo3OntzOjY6Il90b2tlbiI7czo0MDoieWVyR0swcHE4ODd0VTU1akk0ODRJTWRuV1dmYWUwYTE3Y0xydU9WbiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6ODA6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9hZG1pbi9yZWZsZWtzaS1taW5nZ3Vhbi9pbnB1dC80LzIwMjUtMTEtMjgvMjAyNS0xMS0zMC8xNTgzIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTU4MDtzOjE3OiJwYXNzd29yZF9oYXNoX3dlYiI7czo2MDoiJDJ5JDEyJEFMckxZVm1abWU0bHl6NDlqdkhNRWVOdzFWWS9tOXF5VXV2bFk4TGY3Zi9JVUtlZVJsWDRHIjtzOjI0OiJzZWxlY3RlZF90YWh1bl9hamFyYW5faWQiO2k6MTtzOjg6ImZpbGFtZW50IjthOjA6e319', 1764369819);
+('BBSYMTPDotSJY17sO21llLzDrBathHcuxyjpqnoM', 1587, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoia2NrWGFYOXFkdGIzTkpmVEFob1pidjlLaXExU25KbjBRbmZVQUxLTyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDA6Imh0dHBzOi8vanVybmFsLXBrbC50ZXN0L3BlbmlsYWlhbi1wa2xzLzkiO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxNTg3O3M6MTc6InBhc3N3b3JkX2hhc2hfd2ViIjtzOjYwOiIkMnkkMTIkdEl5MldNcUxYa3VQeFgxamlxQmJKZWtxcVl6b2NQTXlzVU4za2U2TjhSOWUxSGphb1hLejIiO3M6ODoiZmlsYW1lbnQiO2E6MDp7fX0=', 1765545115),
+('dXG3MttjVKoRgONt9wpdY5Unlwa7Y4FLpQbClYo7', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiR1VCOUxHQ3pSeFBWTUFWYjYxRnNheWRrY2s3WEh2WTRwdEI3Z1pxRSI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czo0MDoiaHR0cHM6Ly9qdXJuYWwtcGtsLnRlc3QvcGVuaWxhaWFuLXBrbHMvOSI7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjI5OiJodHRwczovL2p1cm5hbC1wa2wudGVzdC9sb2dpbiI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=', 1765878644),
+('EI6nXudrm9FuWscOJw3cSyDjyovsaVAYQvBGdbZj', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiRG9LbzcyOUhVRmEwcHI1UzFRT2M2VTBoZ2tYa0lVSTFyaGxWQ1BWbiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzc6Imh0dHBzOi8vanVybmFsLXBrbC50ZXN0L3RhaHVuLWFqYXJhbnMiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO3M6MTc6InBhc3N3b3JkX2hhc2hfd2ViIjtzOjYwOiIkMnkkMTIkNmVuNmwwbS5ZajhlVFU5QVRIZ0JkT0ZreXBZdEZHbkFLZDk0NHFrQmF2SmhNc2pXQ3YvQWEiO30=', 1765961757),
+('FxzJx1YGFzNHjkHdxzsIW6afKmrZRdoeL0OGNyrG', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiN3FHRWhhdWM1ZmlOalVnRGNEdmhNQm9ZVlVTMlExblZlUzBsM2lBMCI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czoyMjoiaHR0cDovL2p1cm5hbC1wa2wudGVzdCI7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjIyOiJodHRwOi8vanVybmFsLXBrbC50ZXN0Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1765878600),
+('M4F53COsdRcz7Cr3795qNsJ4Pnxn0Tk8YnOy7kVZ', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiNzgwS0hnSFJwQ1BJWTdNakw4MzV1dnJ6QVJlQUVPdUMzUjRqQ1pKUiI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czoyMzoiaHR0cHM6Ly9qdXJuYWwtcGtsLnRlc3QiO31zOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czoyMzoiaHR0cHM6Ly9qdXJuYWwtcGtsLnRlc3QiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1765878600),
+('ZAgNjDEQdflLfkQNsjK24oJ2GwSK4dEhFAE3BcLw', 1575, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiY2RXU3dJMHhreGFFaGJOdlJaTXhvNVVZRTJyQWdTVkFEQTc4cjU3ViI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzg6Imh0dHBzOi8vanVybmFsLXBrbC50ZXN0L3BlbmlsYWlhbi1wa2xzIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTU3NTtzOjE3OiJwYXNzd29yZF9oYXNoX3dlYiI7czo2MDoiJDJ5JDEyJHQwWjRjSHE1SkZSZGlvYzdESGhHL2U5aDNFOHNSTlZGYkliVzNvVXJjNkJ1ZkxyWjBpVnRxIjtzOjI0OiJzZWxlY3RlZF90YWh1bl9hamFyYW5faWQiO3M6MToiMSI7fQ==', 1765879573);
 
 -- --------------------------------------------------------
 
@@ -1629,7 +1658,8 @@ INSERT INTO `siswas` (`id`, `nama_siswa`, `nis`, `tempat_lahir`, `tanggal_lahir`
 (2095, 'Jane Smith', '0987654321', 'Bandung', '2006-05-15', 5, 30, 5, 'aktif', '2025-11-06 13:52:44', '2025-11-06 13:52:44'),
 (2097, 'John Doe', '8573825709', 'Lampung', '2005-01-01', 6, 46, 1, 'aktif', '2025-11-07 14:12:21', '2025-11-07 14:12:21'),
 (2098, 'Jane Smith', '0129392472', 'Bandung', '2006-05-15', 6, 47, 1, 'aktif', '2025-11-07 14:12:21', '2025-11-07 14:12:21'),
-(2099, 'test', 'test', 'banjar', '2025-10-26', 6, 46, 1, 'aktif', '2025-11-08 13:41:42', '2025-11-08 13:41:42');
+(2099, 'test', 'test', 'banjar', '2025-10-26', 6, 46, 1, 'aktif', '2025-11-08 13:41:42', '2025-11-08 13:41:42'),
+(2100, 'jk', '6758', 'banjar', '2007-11-08', 6, 49, 1, 'aktif', '2025-12-08 04:38:01', '2025-12-08 04:38:01');
 
 -- --------------------------------------------------------
 
@@ -1652,7 +1682,7 @@ INSERT INTO `tahun_ajarans` (`id`, `tahun_ajaran`, `created_at`, `updated_at`) V
 (1, '2025/2026', '2025-09-23 18:31:48', '2025-10-21 23:27:21'),
 (5, '2026/2027', '2025-10-13 02:47:43', '2025-10-21 23:27:21'),
 (6, '2027/2028', '2025-10-13 02:54:20', '2025-10-21 23:27:21'),
-(7, '2028/2029', '2025-11-06 14:17:40', '2025-11-06 14:17:40');
+(9, '2028/2029', '2025-12-09 07:42:23', '2025-12-09 07:42:23');
 
 -- --------------------------------------------------------
 
@@ -2345,7 +2375,11 @@ INSERT INTO `users` (`id`, `name`, `username`, `email`, `role_type`, `sekolah_id
 (1583, 'test', 'test', 'test@siswa.com', 'siswa', 6, NULL, '$2y$12$vdq4azUwHwV8c/pczn4pE.kMAIOC.u9lpLAnTUacFuixEWNXdVCXi', 1, NULL, '2025-11-08 13:41:43', '2025-11-08 13:41:43', 2099),
 (1584, 'Admin SEKOLAH TEST', 'sekolah_test', 'sekolah-test@admin.sekolah.com', 'admin_sekolah', 7, NULL, '$2y$12$jv1s3g9DpuW9PsgCehfEge3PnDps9Fa3upiCxG9hx0wUEDXZ5H0x.', 4, NULL, '2025-11-09 14:23:18', '2025-11-09 14:23:18', 7),
 (1585, 'TEST 1', 'TEST1234', 'TEST@gmail.com', 'admin_sekolah', 7, NULL, '$2y$12$n08ULwJ7Rk8rAjpw9OKbeeBwkmCkDj2LbMl8Cq1oBCbr6cNp7l40e', 4, NULL, '2025-11-09 14:25:21', '2025-11-09 14:25:21', NULL),
-(1586, 'TESTING', 'TESTING123', 'TESTING@gmail.com', 'admin_sekolah', 6, NULL, '$2y$12$YWuVRc/mU92BpstN9oAvnuLHvrtVD1jlDHk8hpbA.9pW/5gJYtd.e', 4, NULL, '2025-11-10 02:23:49', '2025-11-10 02:23:49', NULL);
+(1586, 'TESTING', 'TESTING123', 'TESTING@gmail.com', 'admin_sekolah', 6, NULL, '$2y$12$YWuVRc/mU92BpstN9oAvnuLHvrtVD1jlDHk8hpbA.9pW/5gJYtd.e', 4, NULL, '2025-11-10 02:23:49', '2025-11-10 02:23:49', NULL),
+(1587, 'jk', '6758', '6758@siswa.com', 'siswa', 6, NULL, '$2y$12$tIy2WMqLXkuPxX1jiqBbJekqqYzocPMysUN3ke6N8R9e1HjaoXKz2', 1, NULL, '2025-12-08 04:38:02', '2025-12-08 04:38:02', 2100),
+(1588, 'Malik (Prilude Studio)', 'malik.prilude-studio', 'malik.prilude-studio@dudi.pembimbing.com', 'dudi_pembimbing', 6, NULL, '$2y$12$.zPSjpbX47Xn7tunIBABzu7jasFfBfcGJ/0qaO8QeVUeDhkgOEGgu', 5, NULL, '2025-12-08 04:38:31', '2025-12-08 04:38:31', 36),
+(1589, 'Admin SMA TEST', 'sma_test', 'sma-test@admin.sekolah.com', 'admin_sekolah', 8, NULL, '$2y$12$MsZT0N4EJllBC2NrdCnXH.bDyllSKZ1yVAusS2cYmzUogpB3845Gm', 4, NULL, '2025-12-09 07:43:14', '2025-12-09 07:43:14', 8),
+(1590, 'test (test)', 'test.test', 'test.test@jurnalpkl.id', 'dudi_pembimbing', 6, NULL, '$2y$12$bHFAWBD02A.m623vz/iMduLdApLCt9tk6wEq89cQAxDh2fgUEzvzW', 5, NULL, '2025-12-16 09:59:33', '2025-12-16 09:59:33', 37);
 
 -- --------------------------------------------------------
 
@@ -2630,25 +2664,25 @@ ALTER TABLE `weekly_reflections`
 -- AUTO_INCREMENT for table `absensis`
 --
 ALTER TABLE `absensis`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT for table `activity_log`
 --
 ALTER TABLE `activity_log`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=162;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=174;
 
 --
 -- AUTO_INCREMENT for table `dudis`
 --
 ALTER TABLE `dudis`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `dudi_pembimbings`
 --
 ALTER TABLE `dudi_pembimbings`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
@@ -2666,7 +2700,7 @@ ALTER TABLE `gurus`
 -- AUTO_INCREMENT for table `jurnal_harians`
 --
 ALTER TABLE `jurnal_harians`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `kelas`
@@ -2678,7 +2712,7 @@ ALTER TABLE `kelas`
 -- AUTO_INCREMENT for table `laporan_mingguans`
 --
 ALTER TABLE `laporan_mingguans`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=129;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
 
 --
 -- AUTO_INCREMENT for table `migrations`
@@ -2690,13 +2724,13 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `penilaian_details`
 --
 ALTER TABLE `penilaian_details`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `penilaian_pkls`
 --
 ALTER TABLE `penilaian_pkls`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `permissions`
@@ -2714,13 +2748,13 @@ ALTER TABLE `personal_access_tokens`
 -- AUTO_INCREMENT for table `prakerins`
 --
 ALTER TABLE `prakerins`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `prakerin_siswas`
 --
 ALTER TABLE `prakerin_siswas`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -2732,19 +2766,19 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `sekolahs`
 --
 ALTER TABLE `sekolahs`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `siswas`
 --
 ALTER TABLE `siswas`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2100;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2101;
 
 --
 -- AUTO_INCREMENT for table `tahun_ajarans`
 --
 ALTER TABLE `tahun_ajarans`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `tujuan_pembelajarans`
@@ -2756,7 +2790,7 @@ ALTER TABLE `tujuan_pembelajarans`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1587;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1591;
 
 --
 -- AUTO_INCREMENT for table `user_roles`

@@ -32,6 +32,7 @@ use App\Http\Middleware\CheckSchoolStatus;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
+use Illuminate\Support\Facades\Cache;
 
 
 class AdminPanelProvider extends PanelProvider
@@ -65,6 +66,7 @@ class AdminPanelProvider extends PanelProvider
                         }
                         
                         // Cek jumlah tahun ajaran yang dimiliki untuk guru dan dudi pembimbing
+                        return Cache::remember('show_tahun_ajaran_menu_' . $user->id, 600, function () use ($user) {
                         $tahunAjaranCount = 0;
                         
                         if ($user->isGuru()) {
@@ -83,7 +85,8 @@ class AdminPanelProvider extends PanelProvider
                         
                         // Hanya tampil jika punya lebih dari 1 tahun ajaran
                         return $tahunAjaranCount > 1;
-                    }),
+                    });
+                }),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -127,9 +130,9 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook('panels::body.end', fn(): string => Blade::render('@livewire(\'timezone-handler\')'))
             ->assets([
             // Daftarkan CSS OpenLayers
-            Css::make('openlayers-css', 'https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css'),
+            Css::make('openlayers-css', 'css/ol.css'),
             // Daftarkan JS OpenLayers
-            Js::make('openlayers-js', 'https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js'),
+            Js::make('openlayers-js', 'js/ol.js'),
         ]);
             
     }

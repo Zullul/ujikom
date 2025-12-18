@@ -125,8 +125,7 @@ public static function form(Form $form): Form
                 ->relationship('kelas', 'nama_kelas', fn (Builder $query) => 
                 $query->where('sekolah_id', Auth::user()->sekolah_id))
                 ->label('Kelas') 
-                ->searchable()
-                ->preload(),
+                ->searchable(),
                 // SelectFilter::make('tahunAjaran')->relationship('tahunAjaran', 'tahun_ajaran')->label('Tahun Ajaran'),
             ])
             ->actions([

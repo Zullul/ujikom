@@ -16,6 +16,7 @@ use App\Observers\DudiPembimbingObserver;
 use App\Models\PrakerinSiswa; // Tambahkan ini
 use App\Observers\PrakerinSiswaObserver; // Tambahkan ini
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
         Siswa::observe(SiswaObserver::class);
         Guru::observe(GuruObserver::class);
         Dudi::observe(DudiObserver::class); // ✅ Aktifkan observer Dudi

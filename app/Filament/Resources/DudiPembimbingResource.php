@@ -74,7 +74,6 @@ class DudiPembimbingResource extends Resource
                         return $query;
                     })
                     ->searchable()
-                    ->preload()
                     ->required()
                     ->disabled(fn ($livewire) => 
                         $livewire instanceof \Filament\Resources\Pages\CreateRecord && 
