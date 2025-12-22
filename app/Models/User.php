@@ -65,6 +65,12 @@ use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
         return $this->belongsTo(DudiPembimbing::class, 'ref_id');
     }
 
+    public function orangtuaPendamping()
+    {
+        // Relasi jika ada orangtua pendamping di masa depan
+        return $this->hasOne(User::class, 'ref_id')->where('role_type', 'orangtua');
+    }
+
     // Method untuk mengecek role berdasarkan tabel akses
     public function isSuperAdmin(): bool
     {
@@ -96,7 +102,16 @@ use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
         return $this->role_type === 'siswa' || $this->hasRole('siswa');
     }
 
+    public function isOrangtua(): bool
+    {
+        return $this->role_type === 'orangtua' || $this->hasRole('orangtua');
+    }
 
+    // Relasi orangtua ke anak (siswa)
+    public function anak()
+    {
+        return $this->belongsTo(Siswa::class, 'ref_id');
+    }
 
     // Legacy methods untuk backward compatibility
     public function isAdmin(): bool
@@ -126,6 +141,7 @@ use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
                 'guru_pembimbing' => false,
                 'dudi_pembimbing' => false,
                 'siswa' => false,
+                'orangtua' => false,
             ],
             'guru_siswa' => [
                 'super_admin' => true,
@@ -154,6 +170,7 @@ use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
                 'guru_pembimbing' => false,
                 'dudi_pembimbing' => true,
                 'siswa' => false,
+                'orangtua' => true,
             ],
             'laporan_penilaian' => [
                 'super_admin' => true,
@@ -175,6 +192,7 @@ use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
                 'guru_pembimbing' => false,
                 'dudi_pembimbing' => true,
                 'siswa' => false,
+                'orangtua' => false,
             ]
         ];
 
@@ -191,6 +209,7 @@ use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
                 'guru_pembimbing' => [],
                 'dudi_pembimbing' => [],
                 'siswa' => [],
+                'orangtua' => [],
             ],
             'manajemen_user' => [
                 'super_admin' => [],
@@ -198,6 +217,7 @@ use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
                 'guru_pembimbing' => [],
                 'dudi_pembimbing' => [],
                 'siswa' => [],
+                'orangtua' => [],
             ],
             'guru' => [
                 'super_admin' => [],
@@ -205,6 +225,7 @@ use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
                 'guru_pembimbing' => [],
                 'dudi_pembimbing' => [],
                 'siswa' => [],
+                'orangtua' => [],
             ],
             'siswa' => [
                 'super_admin' => [],
@@ -212,6 +233,7 @@ use HasApiTokens, HasFactory, Notifiable, HasRoles, LogsActivity;
                 'guru_pembimbing' => [],
                 'dudi_pembimbing' => [],
                 'siswa' => [],
+                'orangtua' => [],
             ]
         ];
 

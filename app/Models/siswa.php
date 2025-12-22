@@ -54,6 +54,12 @@ class Siswa extends Model
         return $this->hasOne(User::class, 'ref_id')->where('role_id', 1);
     }
 
+    // Relasi ke orangtua (parent)
+    public function orangtua()
+    {
+        return $this->hasOne(User::class, 'ref_id')->where('role_type', 'orangtua');
+    }
+
     // Relasi ke prakerin siswa
     public function prakerinSiswa()
     {

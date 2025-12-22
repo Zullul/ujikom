@@ -15,16 +15,29 @@
         }
     },
     capturePhoto() {
-        const video = this.$refs.video;
-        const canvas = this.$refs.canvas;
-        const context = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.save();
-        context.scale(-1, 1);
-        context.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
-        context.restore();
-        this.capturedImage = canvas.toDataURL('image/jpeg', 0.9);
+    const video = this.$refs.video;
+    const canvas = this.$refs.canvas;
+    const context = canvas.getContext('2d');
+
+    // 1. TURUNKAN RESOLUSI (Resize)
+    // Jangan pakai ukuran asli video (misal 1280x720), kita kecilkan ke max lebar 600px
+    const maxWidth = 600; 
+    const scaleFactor = maxWidth / video.videoWidth;
+    const newWidth = maxWidth;
+    const newHeight = video.videoHeight * scaleFactor;
+
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    context.save();
+    context.scale(-1, 1); // Efek mirror
+    // Gambar ulang dengan ukuran lebih kecil
+    context.drawImage(video, -newWidth, 0, newWidth, newHeight);
+    context.restore();
+
+    // 2. TURUNKAN KUALITAS JPEG
+    // Ubah 0.9 menjadi 0.5 atau 0.6 (Kualitas sedang, ukuran jauh lebih kecil)
+    this.capturedImage = canvas.toDataURL('image/jpeg', 0.5);
         const hiddenFoto = document.querySelector('input[id=\'foto_izin_sakit_data_input\']');
         if (hiddenFoto) {
             hiddenFoto.value = this.capturedImage;

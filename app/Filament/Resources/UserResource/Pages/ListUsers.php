@@ -38,6 +38,13 @@ class ListUsers extends ListRecords
                         ->where('role_type', 'siswa')
                         ->count()
                 ),
+            'orangtua' => Tab::make('Orangtua')
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('role_type', 'orangtua'))
+                ->badge(
+                    $this->getResource()::getEloquentQuery()
+                        ->where('role_type', 'orangtua')
+                        ->count()
+                ),
             'guru' => Tab::make('Guru')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('role_type', 'guru'))
                 ->badge(

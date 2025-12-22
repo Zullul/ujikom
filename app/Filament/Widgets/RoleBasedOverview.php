@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Card;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class RoleBasedOverview extends BaseWidget
 {
@@ -46,15 +47,24 @@ class RoleBasedOverview extends BaseWidget
             return $this->siswaCards($user);
         }
 
+        if ($user->isOrangtua()) {
+            return $this->orangtuaCards($user);
+        }
+
         return [];
     }
 
     protected function superAdminCards(): array
     {
-        $totalSekolah = Sekolah::count();
-        $totalSiswa = Siswa::count();
-        $totalGuru = Guru::count();
-        $totalDudi = Dudi::count();
+        // Cache global counts untuk menghindari hit database berulang
+        [$totalSekolah, $totalSiswa, $totalGuru, $totalDudi] = Cache::remember('rb_overview_super_admin_counts', 60, function () {
+            return [
+                Sekolah::count(),
+                Siswa::count(),
+                Guru::count(),
+                Dudi::count(),
+            ];
+        });
 
         return [
             Card::make('Sekolah', (string) $totalSekolah)->description('Terdaftar')->color('success'),
@@ -68,14 +78,23 @@ class RoleBasedOverview extends BaseWidget
     {
         $sid = $user->sekolah_id;
 
-        $totalSiswa = Siswa::where('sekolah_id', $sid)->count();
-        $totalGuru = Guru::where('sekolah_id', $sid)->count();
-        $totalDudi = Dudi::where('sekolah_id', $sid)->count();
+        // Cache per sekolah untuk 60 detik
+        [$totalSiswa, $totalGuru, $totalDudi] = Cache::remember("rb_overview_admin_counts_{$sid}", 60, function () use ($sid) {
+            return [
+                Siswa::where('sekolah_id', $sid)->count(),
+                Guru::where('sekolah_id', $sid)->count(),
+                Dudi::where('sekolah_id', $sid)->count(),
+            ];
+        });
 
-        $today = Carbon::today();
-        $absensiHariIni = Absensi::whereDate('tanggal', $today)
-            ->whereHas('siswa', fn($q) => $q->where('sekolah_id', $sid))
-            ->count();
+        // Hindari whereDate agar index tanggal bisa dipakai
+        $start = Carbon::today()->startOfDay();
+        $end = Carbon::today()->endOfDay();
+        $absensiHariIni = Cache::remember("rb_overview_admin_absensi_today_{$sid}", 30, function () use ($sid, $start, $end) {
+            return Absensi::whereBetween('tanggal', [$start, $end])
+                ->whereHas('siswa', fn($q) => $q->where('sekolah_id', $sid))
+                ->count();
+        });
 
         return [
             Card::make('Siswa', (string) $totalSiswa)->description('Di sekolah Anda')->color('primary'),
@@ -90,16 +109,23 @@ class RoleBasedOverview extends BaseWidget
         // ref_id menunjuk ke id guru
         $gid = $user->ref_id;
 
-        $totalBimbingan = PrakerinSiswa::where('guru_pembimbing_id', $gid)->count();
+        $totalBimbingan = Cache::remember("rb_overview_guru_bimbingan_{$gid}", 60, function () use ($gid) {
+            return PrakerinSiswa::where('guru_pembimbing_id', $gid)->count();
+        });
 
-        $today = Carbon::today();
-        $absensiHariIni = Absensi::whereDate('tanggal', $today)
-            ->whereHas('prakerinSiswa', fn($q) => $q->where('guru_pembimbing_id', $gid))
-            ->count();
+        $start = Carbon::today()->startOfDay();
+        $end = Carbon::today()->endOfDay();
+        $absensiHariIni = Cache::remember("rb_overview_guru_absensi_today_{$gid}", 30, function () use ($gid, $start, $end) {
+            return Absensi::whereBetween('tanggal', [$start, $end])
+                ->whereHas('prakerinSiswa', fn($q) => $q->where('guru_pembimbing_id', $gid))
+                ->count();
+        });
 
-        $belumVerifikasi = Absensi::whereHas('prakerinSiswa', fn($q) => $q->where('guru_pembimbing_id', $gid))
-            ->whereNull('diverifikasi_pembimbing_dudi')
-            ->count();
+        $belumVerifikasi = Cache::remember("rb_overview_guru_belum_verif_{$gid}", 30, function () use ($gid) {
+            return Absensi::whereHas('prakerinSiswa', fn($q) => $q->where('guru_pembimbing_id', $gid))
+                ->whereNull('diverifikasi_pembimbing_dudi')
+                ->count();
+        });
 
         return [
             Card::make('Siswa Bimbingan', (string) $totalBimbingan)->description('Total aktif')->color('primary'),
@@ -113,18 +139,25 @@ class RoleBasedOverview extends BaseWidget
         // ref_id menunjuk ke id dudi_pembimbing
         $dpid = $user->ref_id;
 
-        $totalAnak = PrakerinSiswa::where('dudi_pembimbing_id', $dpid)->count();
+        $totalAnak = Cache::remember("rb_overview_dudi_anak_{$dpid}", 60, function () use ($dpid) {
+            return PrakerinSiswa::where('dudi_pembimbing_id', $dpid)->count();
+        });
 
-        $today = Carbon::today();
-        $absensiHariIni = Absensi::whereDate('tanggal', $today)
-            ->whereHas('prakerinSiswa', fn($q) => $q->where('dudi_pembimbing_id', $dpid))
-            ->count();
+        $start = Carbon::today()->startOfDay();
+        $end = Carbon::today()->endOfDay();
+        $absensiHariIni = Cache::remember("rb_overview_dudi_absensi_today_{$dpid}", 30, function () use ($dpid, $start, $end) {
+            return Absensi::whereBetween('tanggal', [$start, $end])
+                ->whereHas('prakerinSiswa', fn($q) => $q->where('dudi_pembimbing_id', $dpid))
+                ->count();
+        });
 
-        $belumVerifikasi = Absensi::whereHas('prakerinSiswa', fn($q) => $q->where('dudi_pembimbing_id', $dpid))
-            ->where(function($q){
-                $q->whereNull('diverifikasi_pembimbing_dudi')->orWhere('diverifikasi_pembimbing_dudi', false);
-            })
-            ->count();
+        $belumVerifikasi = Cache::remember("rb_overview_dudi_belum_verif_{$dpid}", 30, function () use ($dpid) {
+            return Absensi::whereHas('prakerinSiswa', fn($q) => $q->where('dudi_pembimbing_id', $dpid))
+                ->where(function($q){
+                    $q->whereNull('diverifikasi_pembimbing_dudi')->orWhere('diverifikasi_pembimbing_dudi', false);
+                })
+                ->count();
+        });
 
         return [
             Card::make('Siswa PKL', (string) $totalAnak)->description('Di bawah bimbingan')->color('primary'),
@@ -137,9 +170,12 @@ class RoleBasedOverview extends BaseWidget
     {
         // ref_id menunjuk ke id siswa
         $sid = $user->ref_id;
-        $today = Carbon::today();
+        $start = Carbon::today()->startOfDay();
+        $end = Carbon::today()->endOfDay();
 
-        $absensi = Absensi::where('siswa_id', $sid)->whereDate('tanggal', $today)->first();
+        $absensi = Absensi::where('siswa_id', $sid)
+            ->whereBetween('tanggal', [$start, $end])
+            ->first();
 
         $status = $absensi->status_kehadiran ?? 'Belum Absen';
         $jamMasuk = $absensi?->jam_masuk ? Carbon::parse($absensi->jam_masuk)->format('H:i') : '-';
@@ -150,5 +186,41 @@ class RoleBasedOverview extends BaseWidget
             Card::make('Jam Masuk', (string) $jamMasuk)->description('Hari ini')->color('primary'),
             Card::make('Jam Pulang', (string) $jamPulang)->description('Hari ini')->color('primary'),
         ];
+    }
+
+    protected function orangtuaCards(User $user): array
+    {
+        // ref_id menunjuk ke id siswa (anaknya)
+        $anak = Siswa::find($user->ref_id);
+
+        if (!$anak) {
+            return [Card::make('Informasi', 'Data anak tidak ditemukan')->description('Error')->color('danger')];
+        }
+
+        // Hitung total refleksi yang sudah diisi (cache pendek)
+        $totalRefleksi = Cache::remember("rb_overview_ortu_total_ref_{$anak->id}", 60, function () use ($anak) {
+            return \App\Models\LaporanMingguan::where('siswa_id', $anak->id)->count();
+        });
+
+        // Cek refleksi minggu ini
+        $mingguan = Cache::remember("rb_overview_ortu_ref_minggu_ini_{$anak->id}", 30, function () use ($anak) {
+            return \App\Models\LaporanMingguan::where('siswa_id', $anak->id)
+                ->where('minggu_ke', $this->getWeekNumber())
+                ->first();
+        });
+
+        $statusRefleksi = $mingguan ? 'Sudah Diisi' : 'Belum Diisi';
+
+        return [
+            Card::make('Nama Anak', (string) $anak->nama_siswa)->description('Data siswa')->color('primary'),
+            Card::make('NIS Anak', (string) $anak->nis)->description('Nomor identitas')->color('primary'),
+            Card::make('Total Refleksi', (string) $totalRefleksi)->description('Sudah diisi')->color('success'),
+            Card::make('Minggu Ini', (string) $statusRefleksi)->description('Status')->color($mingguan ? 'success' : 'warning'),
+        ];
+    }
+
+    private function getWeekNumber(): int
+    {
+        return Carbon::now()->weekOfYear;
     }
 }

@@ -10,7 +10,7 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, ...$roles)
     {
         if (!auth()->check()) {
-            return redirect('/login');
+            return redirect()->route('filament.admin.auth.login');
         }
 
         $userRole = auth()->user()->role->role;

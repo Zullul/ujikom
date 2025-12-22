@@ -13,6 +13,11 @@ class EnsureTahunAjaranIsSelected
     {
         $user = Auth::user();
 
+        // Skip untuk orangtua, siswa, dan superadmin (tidak perlu pilih tahun ajaran)
+        if ($user && ($user->isOrangtua() || $user->isSiswa() || $user->isSuperAdmin())) {
+            return $next($request);
+        }
+
         // Skip middleware untuk logout dan halaman pilih tahun ajaran
         if ($request->routeIs('filament.admin.auth.logout') || 
             $request->routeIs('filament.admin.pages.pilih-tahun-ajaran')) {

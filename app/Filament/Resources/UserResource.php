@@ -251,6 +251,7 @@ class UserResource extends Resource
         }
 
         $created = 0;
+        // Buat akun siswa yang belum punya
         $siswas = Siswa::where('sekolah_id', $sekolah->id)->whereDoesntHave('user')->get();
         foreach ($siswas as $siswa) {
             if ($created >= $sisaKuota) break;
@@ -267,6 +268,26 @@ class UserResource extends Resource
             $created++;
         }
 
+        // Buat akun orangtua untuk siswa yang belum punya akun orangtua
+        $parents = Siswa::where('sekolah_id', $sekolah->id)
+            ->whereDoesntHave('orangtua')
+            ->get();
+        foreach ($parents as $siswa) {
+            if ($created >= $sisaKuota) break;
+            User::create([
+                'name' => 'Orangtua dari ' . $siswa->nama_siswa,
+                'username' => 'ortu_' . $siswa->nis,
+                'email' => 'ortu_' . $siswa->nis . '@jurnalpkl.id',
+                'password' => Hash::make($siswa->nis),
+                'role_type' => 'orangtua',
+                'role_id' => 6,
+                'ref_id' => $siswa->id,
+                'sekolah_id' => $siswa->sekolah_id,
+            ]);
+            $created++;
+        }
+
+        // Buat akun guru yang belum punya
         $gurus = Guru::where('sekolah_id', $sekolah->id)->whereDoesntHave('user')->get();
         foreach ($gurus as $guru) {
             if ($created >= $sisaKuota) break;

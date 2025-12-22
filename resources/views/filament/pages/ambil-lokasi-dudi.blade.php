@@ -77,11 +77,13 @@
         
     </div> {{-- SEMUA SCRIPT ADA DI SINI, DI LUAR <div> --}}
     @push('scripts')
+    <link rel="stylesheet" href="{{ asset('css/leaflet.css') }}">
+    <script src="{{ asset('js/leaflet.js') }}"></script>
     <script>
-        // --- FUNGSI UTAMA ---
+        // --- FUNGSI UTAMA (Leaflet) ---
         function initMapWithCircle() {
-            if (typeof ol === 'undefined') {
-                setTimeout(initMapWithCircle, 300);
+            if (typeof L === 'undefined') {
+                setTimeout(initMapWithCircle, 200);
                 return;
             }
             const mapElement = document.getElementById('map');
@@ -89,105 +91,59 @@
                 return;
             }
 
-            // Ambil data TERBARU langsung dari komponen Livewire
             const latitude = @this.get('data.latitude');
             const longitude = @this.get('data.longitude');
-            const radius = @this.get('data.radius') ?? 100; // Ambil radius dari form
+            const radius = @this.get('data.radius') ?? 100;
 
             if (!latitude || !longitude) {
                 return;
             }
 
-            mapElement.innerHTML = ''; 
-            
-            const center = ol.proj.fromLonLat([longitude, latitude]);
-            
-            const markerFeature = new ol.Feature({
-                geometry: new ol.geom.Point(center),
+            mapElement.innerHTML = '';
+
+            const center = [latitude, longitude];
+
+            const map = L.map('map', { zoomControl: true }).setView(center, 17);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            const markerIcon = L.divIcon({
+                className: 'custom-marker',
+                html: '<div></div>',
+                iconSize: [14, 14],
+                iconAnchor: [7, 7]
             });
-            
-            const markerStyle = new ol.style.Style({
-                image: new ol.style.Icon({
-                    anchor: [0.5, 1],
-                    src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="36" viewBox="0 0 24 36"><path fill="%23EF4444" d="M12 0C7.03 0 3 4.03 3 9c0 7.5 9 18 9 18s9-10.5 9-18c0-4.97-4.03-9-9-9zm0 12c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>',
-                    scale: 1.5
-                })
-            });
-            markerFeature.setStyle(markerStyle);
-            
-            const circleFeature = new ol.Feature({
-                geometry: new ol.geom.Circle(center, radius),
-            });
-            
-            const circleStyle = new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'rgba(59, 130, 246, 0.8)',
-                    width: 2,
-                }),
-                fill: new ol.style.Fill({
-                    color: 'rgba(96, 165, 250, 0.25)',
-                }),
-            });
-            circleFeature.setStyle(circleStyle);
-            
-            const vectorSource = new ol.source.Vector({
-                features: [circleFeature, markerFeature],
-            });
-            
-            const vectorLayer = new ol.layer.Vector({
-                source: vectorSource,
-            });
-            
-            const map = new ol.Map({
-                target: 'map',
-                layers: [
-                    new ol.layer.Tile({
-                        source: new ol.source.OSM()
-                    }),
-                    vectorLayer
-                ],
-                view: new ol.View({
-                    center: center,
-                    zoom: 17
-                })
-            });
-            
-            const extent = circleFeature.getGeometry().getExtent();
-            map.getView().fit(extent, { padding: [50, 50, 50, 50] });
-            
-            const popup = new ol.Overlay({
-                element: document.getElementById('popup'),
-                positioning: 'bottom-center',
-                stopEvent: false,
-            });
-            map.addOverlay(popup);
-            
-            map.on('click', function(evt) {
-                const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) { return feature; });
-                if (feature === markerFeature) {
-                    const coordinates = feature.getGeometry().getCoordinates();
-                    popup.setPosition(coordinates);
-                    const popupElement = popup.getElement();
-                    popupElement.innerHTML = `
-                        <div style="background: white; padding: 12px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width: 200px; color: #1f2937;">
-                            <h3 style="font-weight: bold; margin-bottom: 8px;">📍 Lokasi DUDI</h3>
-                            <p style="margin: 4px 0; font-size: 12px; color: #4b5563;">Lat: ${latitude.toFixed(6)}</p>
-                            <p style="margin: 4px 0; font-size: 12px; color: #4b5563;">Lng: ${longitude.toFixed(6)}</p>
-                            <p style="margin: 4px 0; font-size: 12px; color: #3b82f6; font-weight: 600;">Radius: ${radius} meter</p>
-                        </div>
-                    `;
-                    popupElement.style.display = 'block';
-                } else {
-                    popup.getElement().style.display = 'none';
-                }
-            });
+
+            const marker = L.marker(center, { icon: markerIcon }).addTo(map);
+
+            const circle = L.circle(center, {
+                radius: radius,
+                color: 'rgba(59, 130, 246, 0.8)',
+                weight: 2,
+                fillColor: 'rgba(96, 165, 250, 0.25)',
+                fillOpacity: 0.25
+            }).addTo(map);
+
+            map.fitBounds(circle.getBounds(), { padding: [50, 50] });
+
+            marker.bindPopup(`
+                <div style="min-width: 200px; color: #1f2937;">
+                    <h3 style="font-weight: bold; margin-bottom: 8px;">📍 Lokasi DUDI</h3>
+                    <p style="margin: 4px 0; font-size: 12px; color: #4b5563;">Lat: ${latitude.toFixed(6)}</p>
+                    <p style="margin: 4px 0; font-size: 12px; color: #4b5563;">Lng: ${longitude.toFixed(6)}</p>
+                    <p style="margin: 4px 0; font-size: 12px; color: #3b82f6; font-weight: 600;">Radius: ${radius} meter</p>
+                </div>
+            `);
+
+            marker.on('click', () => marker.openPopup());
         }
 
         // --- EVENT LISTENERS ---
         document.addEventListener('livewire:init', () => {
-            // HANYA dengarkan event 'lokasiDiambil'
             @this.on('lokasiDiambil', () => {
-                // Panggil initMapWithCircle HANYA saat tombol diklik
                 setTimeout(initMapWithCircle, 50);
             });
         });
@@ -216,14 +172,9 @@
             const latitude = position.coords.latitude;
             const longitude = position.coords.longitude;
             
-            // Set state di $data
             @this.set('data.latitude', latitude);
             @this.set('data.longitude', longitude);
-            
-            // "Nyalakan saklar" untuk tampilkan peta
             @this.set('showMap', true); 
-            
-            // Kirim event ke listener 'lokasiDiambil'
             @this.dispatch('lokasiDiambil');
             
             new FilamentNotification()

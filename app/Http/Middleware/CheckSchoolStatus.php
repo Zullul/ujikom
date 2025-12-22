@@ -13,6 +13,11 @@ class CheckSchoolStatus
     {
         $user = Auth::user();
 
+        // Skip untuk orangtua (mereka hanya lihat data, tidak perlu cek masa aktif ketat)
+        if ($user && $user->isOrangtua()) {
+            return $next($request);
+        }
+
         // Cek hanya untuk user yang memiliki sekolah_id (bukan super admin)
         if ($user && $user->sekolah_id) {
             // Eager load sekolah jika belum ter-load

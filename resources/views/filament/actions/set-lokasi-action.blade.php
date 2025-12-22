@@ -1,6 +1,6 @@
-{{-- Load OpenLayers CSS --}}
+{{-- Load local Leaflet assets --}}
 @once
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css">
+<link rel="stylesheet" href="{{ asset('css/leaflet.css') }}">
 <style>
     .map-container-custom {
         width: 100%;
@@ -8,14 +8,17 @@
         min-height: 400px !important;
         position: relative !important;
     }
-    .map-container-custom .ol-viewport {
-        position: relative !important;
-    }
+    .leaflet-container { height: 100%; width: 100%; }
+    .custom-marker { display: flex; align-items: center; justify-content: center; }
+    .custom-marker div { width: 14px; height: 14px; border-radius: 9999px; background-color: #ef4444; box-shadow: 0 0 0 2px #ffffff; }
+    .map-container-custom .leaflet-pane { position: absolute !important; }
+    .map-container-custom .leaflet-overlay-pane { position: absolute !important; }
+    .map-container-custom .leaflet-marker-pane { position: absolute !important; }
+    .map-container-custom .leaflet-popup-pane { position: absolute !important; }
+    .map-container-custom .leaflet-tile-pane { position: absolute !important; }
 </style>
 @endonce
-
-{{-- Load OpenLayers JS --}}
-<script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
+<script src="{{ asset('js/leaflet.js') }}"></script>
 
 <div 
     x-data="{
@@ -24,14 +27,13 @@
         // Fungsi untuk menggambar peta
         initMap() {
             console.log('🗺️ initMap() dipanggil');
-            
-            // Cek jika OpenLayers (ol) sudah dimuat
-            if (typeof ol === 'undefined') {
-                console.warn('⚠️ OpenLayers belum dimuat, tunggu 200ms...');
+            // Cek jika Leaflet (L) sudah dimuat
+            if (typeof L === 'undefined') {
+                console.warn('⚠️ Leaflet belum dimuat, tunggu 200ms...');
                 setTimeout(() => this.initMap(), 200);
                 return;
             }
-            console.log('✅ OpenLayers sudah dimuat');
+            console.log('✅ Leaflet sudah dimuat');
 
             // Cek $wire
             if (typeof $wire === 'undefined') {
@@ -63,6 +65,14 @@
                 return;
             }
 
+            // Bersihkan peta lama dan reset Leaflet instance jika ada
+            if (this.map) {
+                try { this.map.remove(); } catch (e) { console.warn('Leaflet remove() warning', e); }
+                this.map = null;
+            }
+            if (mapElement._leaflet_id) {
+                delete mapElement._leaflet_id;
+            }
             mapElement.innerHTML = ''; // Bersihkan peta lama
             console.log('🧹 Map container dibersihkan');
 
@@ -74,90 +84,51 @@
             }
 
             console.log('🌍 Mulai membuat peta...');
-            const center = ol.proj.fromLonLat([longitude, latitude]);
-            console.log('📌 Center coordinates:', center);
+            const centerLatLng = [latitude, longitude];
+            console.log('📌 Center coordinates:', centerLatLng);
 
-            console.log('📍 Membuat marker feature...');
-            const markerFeature = new ol.Feature({
-                geometry: new ol.geom.Point(center),
-            });
-
-            // String SVG untuk marker
-            const markerIcon = 'data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;24&quot; height=&quot;36&quot; viewBox=&quot;0 0 24 36&quot;><path fill=&quot;%23EF4444&quot; d=&quot;M12 0C7.03 0 3 4.03 3 9c0 7.5 9 18 9 18s9-10.5 9-18c0-4.97-4.03-9-9-9zm0 12c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z&quot;/></svg>';
-
-            const markerStyle = new ol.style.Style({
-                image: new ol.style.Icon({
-                    anchor: [0.5, 1],
-                    src: markerIcon,
-                    scale: 1.5
-                })
-            });
-            markerFeature.setStyle(markerStyle);
-            console.log('✅ Marker feature dibuat');
-
-            console.log('🔵 Membuat circle feature dengan radius:', radius);
-            const circleFeature = new ol.Feature({
-                geometry: new ol.geom.Circle(center, radius),
-            });
-
-            const circleStyle = new ol.style.Style({
-                stroke: new ol.style.Stroke({ color: 'rgba(59, 130, 246, 0.8)', width: 2 }),
-                fill: new ol.style.Fill({ color: 'rgba(96, 165, 250, 0.25)' }),
-            });
-            circleFeature.setStyle(circleStyle);
-            console.log('✅ Circle feature dibuat');
-
-            console.log('🎨 Membuat vector layer...');
-            const vectorSource = new ol.source.Vector({
-                features: [circleFeature, markerFeature],
-            });
-
-            const vectorLayer = new ol.layer.Vector({
-                source: vectorSource,
-            });
-            console.log('✅ Vector layer dibuat');
-
-            console.log('🗺️ Membuat OpenLayers Map...');
-            console.log('📏 Map container dimensions:', {
-                width: mapElement.offsetWidth,
-                height: mapElement.offsetHeight,
-                clientWidth: mapElement.clientWidth,
-                clientHeight: mapElement.clientHeight
-            });
-            
             try {
-                this.map = new ol.Map({
-                    target: mapElement,
-                    layers: [
-                        new ol.layer.Tile({ source: new ol.source.OSM() }),
-                        vectorLayer
-                    ],
-                    view: new ol.View({ center: center, zoom: 17 })
+                this.map = L.map(mapElement, {
+                    zoomControl: true
+                }).setView(centerLatLng, 17);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(this.map);
+
+                const markerIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div></div>',
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
                 });
-                console.log('✅ Map berhasil dibuat!', this.map);
-                
-                // Force update size setelah 100ms
+
+                const marker = L.marker(centerLatLng, { icon: markerIcon }).addTo(this.map);
+                console.log('✅ Marker dibuat');
+
+                const circle = L.circle(centerLatLng, {
+                    radius: radius,
+                    color: 'rgba(59, 130, 246, 0.8)',
+                    weight: 2,
+                    fillColor: 'rgba(96, 165, 250, 0.25)',
+                    fillOpacity: 0.25
+                }).addTo(this.map);
+                console.log('✅ Circle dibuat');
+
+                // Fit ke bounds circle
+                this.map.fitBounds(circle.getBounds(), { padding: [50, 50] });
+
+                // Force invalidate size setelah 100ms
                 setTimeout(() => {
-                    console.log('🔄 Update map size...');
-                    this.map.updateSize();
-                    console.log('📏 Updated map size');
+                    console.log('🔄 Invalidate map size...');
+                    this.map.invalidateSize();
+                    console.log('📏 Invalidated map size');
                 }, 100);
-                
             } catch (error) {
-                console.error('❌ Error membuat map:', error);
+                console.error('❌ Error membuat peta (Leaflet):', error);
                 return;
             }
-
-            console.log('📐 Fitting map ke extent...');
-            const extent = circleFeature.getGeometry().getExtent();
-            this.map.getView().fit(extent, { padding: [50, 50, 50, 50] });
-            
-            // Render ulang setelah fit
-            setTimeout(() => {
-                console.log('🎨 Rendering map...');
-                this.map.render();
-                console.log('🎉 Peta berhasil ditampilkan!');
-            }, 150);
         },
 
         // Fungsi untuk mengambil lokasi Geolocation
@@ -214,7 +185,7 @@
         
         // Inisialisasi peta 300ms setelah modal dibuka
         console.log('⏰ Scheduling initMap() dalam 300ms...');
-        setTimeout(() => initMap(), 300);
+        setTimeout(() => { try { initMap(); } catch (e) { console.warn('Fallback to this.initMap()', e); this.initMap(); } }, 300);
     "
     @update-map.window="console.log('🔔 Event update-map diterima'); initMap()"
 >
